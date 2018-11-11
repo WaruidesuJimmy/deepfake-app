@@ -7,6 +7,7 @@
   },
   "dependencies": {
     "ffmpeg": "0.0.4",
+    "file-extension": "^4.0.5",
     "fluent-ffmpeg": "^2.1.2",
     "get-video-duration": "^1.0.2",
     "jquery": "^3.3.1",

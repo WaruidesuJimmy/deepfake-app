@@ -6,7 +6,9 @@ const {
 const ffmpeg = require('ffmpeg')
 const ffmpeg_fluent = require('fluent-ffmpeg');
 const command = ffmpeg_fluent();
-const getVideoDurationInSeconds  = require('get-video-duration')
+const getVideoDurationInSeconds = require('get-video-duration')
+const fs = require('fs')
+const fileExtension = require('file-extension')
 
 
 
@@ -77,6 +79,18 @@ ipcMain.on('extarct', (e, data) => {
 
 ipcMain.on('ffmpeg', (e, data) => {
 
+  const {path, name} = data
+  let videos = []
+  let images = []
+
+  fs.readdir(dir, (err, files) => {
+    files.forEach((file) => {
+      if (isImage(file)) images.push(file)
+      if (isVideo(file)) videos.push(file)
+    })
+  })
+
+  
   // try {
   //   var process = new ffmpeg('video/sobolev.mp4');
   //   process.then(function (video) {
@@ -106,12 +120,25 @@ ipcMain.on('ffmpeg', (e, data) => {
         console.log('Screenshots taken');
       })
       .screenshots({
-        count: _duration, 
+        count: _duration,
         folder: 'ffmpeg/'
       })
-  }).catch((err)=>console.log(err))
-  
+  }).catch((err) => console.log(err))
+
 })
 
-// В этом файле вы можете включить код другого основного процесса 
-// вашего приложения. Можно также поместить их в отдельные файлы и применить к ним require.
+const isImage = file => {
+  const image_pattern = ['png', 'jpg', 'jpeg']
+  image_pattern.forEach((ext) => {
+    if (fileExtension(file) === ext) return true
+  })
+  return false
+}
+
+const isVideo = file => {
+  const image_pattern = ['mp4', 'avi']
+  image_pattern.forEach((ext) => {
+    if (fileExtension(file) === ext) return true
+  })
+  return false
+}

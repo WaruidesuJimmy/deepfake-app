@@ -12,6 +12,10 @@ const path = require('path')
 const fileExtension = require('file-extension')
 
 
+const dir_to_raw_videos = __dirname + '/v1/data/raw-videos/',
+      dir_to_raw_photos = __dirname + '/v1/data/raw-photo/'
+
+
 
 const {
   app,
@@ -71,6 +75,15 @@ app.on('activate', () => {
   }
 })
 
+ipcMain.on('extract-load', (e) => {
+  console.log(loadDirectoriesNames(dir_to_raw_photos))
+  win.webContents.send('extract-load', loadDirectoriesNames(dir_to_raw_photos))
+})
+
+
+const loadDirectoriesNames = async dir => await readdirAsync(dir)
+
+
 ipcMain.on('extarct', (e, data) => {
 
   const pyProg = spawn('python', ['faceswap/faceswap.py', 'extract', '-i', 'faceswap/photo/sobolev', '-o', 'extract', '-f', 'faceswap/photo/sobolev/sobolev-0.png']);
@@ -80,45 +93,6 @@ ipcMain.on('extarct', (e, data) => {
 
 ipcMain.on('load-raw-data', (e, data) => {
   loadRawData(data)
-
-
-
-
-
-  // try {
-  //   var process = new ffmpeg('video/sobolev.mp4');
-  //   process.then(function (video) {
-  //     // Callback mode
-  //     video.fnExtractFrameToJPG('ffmpeg', {
-  //       frame_rate : 1,
-  //       number : 500,
-  //       file_name : 'my_frame_%t_%s'
-  //     }, function (error, files) {
-  //       if (!error)
-  //         console.log('Frames: ' + files);
-  //     });
-  //   }, function (err) {
-  //     console.log('Error: ' + err);
-  //   });
-  // } catch (e) {
-  //   console.log(e.code);
-  //   console.log(e.msg);
-  // }
-  // getVideoDurationInSeconds.getVideoDurationInSeconds('video/sobolev.mp4').then((_duration) => {
-  //   console.log(_duration)
-  //   ffmpeg_fluent('video/sobolev.mp4')
-  //     .on('filenames', function (filenames) {
-  //       console.log('Will generate ' + filenames.length)
-  //     })
-  //     .on('end', function () {
-  //       console.log('Screenshots taken');
-  //     })
-  //     .screenshots({
-  //       count: _duration,
-  //       folder: 'ffmpeg/'
-  //     })
-  // }).catch((err) => console.log(err))
-
 })
 
 const isImage = file => {
@@ -140,6 +114,7 @@ const isVideo = file => {
 }
 
 const loadRawData = async data => {
+
   const {
     path,
     name
@@ -152,12 +127,23 @@ const loadRawData = async data => {
     if (isImage(file)) images.push(file)
     if (isVideo(file)) videos.push(file)
   })
-  copyAll(images, path,  __dirname + `/v1/data/raw-photo/${name}`)
+  if (images.length !== 0) copyAll(images, path, dir_to_raw_photos + name)
+  if (videos.length !== 0) videos.forEach((video) => convertVideoToImages(path + '/' + video, dir_to_raw_photos + name))
+
 
 }
 
 
+const convertVideoToImages = (video, dstDir) => {
 
+  const ffmpegProg = spawn('ffmpeg', ['-i', video, dstDir])
+
+  ffmpegProg.stdout.on('data', (data) => {
+    console.log(data)
+  });
+
+
+}
 const readdirAsync = (path) => {
   return new Promise((resolve, reject) => {
     fs.readdir(path, (err, files) => {

@@ -1,0 +1,20 @@
+{
+  "name": "deepfake-app",
+  "version": "0.1.0",
+  "main": "main.js",
+  "scripts": {
+    "start": "electron ."
+  },
+  "dependencies": {
+    "ffmpeg": "0.0.4",
+    "fluent-ffmpeg": "^2.1.2",
+    "get-video-duration": "^1.0.2",
+    "jquery": "^3.3.1",
+    "node-cmd": "^3.0.0",
+    "python-shell": "^1.0.6",
+    "semantic-ui": "^2.4.2"
+  },
+  "devDependencies": {
+    "electron": "^3.0.8"
+  }
+}

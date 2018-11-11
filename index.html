@@ -16,17 +16,49 @@
 
   <div class="main">
 
-    <div id='video-photo' >
+    <div id='menu' >
       <div class="ui input">
-        <form enctype="multipart/form-data" method="post" class = 'sendFile' id = 'videoPhotoForm'>
-          <input type="file" name="videoPhoto'">
-          <div class="ui input">
-            <input type="submit" placeholder="send">
-          </div>
-        </form>
+        <input type="button" value="video-photo" id="display-video-photo">
+        <input type="button" value="extract" id="display-extract">
+        <input type="button" value="train" id="display-train">
+        <input type="button" value="convert" id="display-convert">
+        <input type="button" value="photo-video" id="display-photo-video">
       </div>
-
     </div>
+
+    <div id='video-photo' >
+        <div class="ui input">
+          <input type="text" placeholder="enter path of directory" id="path-video-photo">
+          <input type="button" value="send" id="send-button-video-photo">
+        </div>
+    </div>
+
+    <div class="ui icon message" id="video-photo-loading">
+      <i class="notched circle loading icon"></i>
+      <div class="content">
+        <div class="header">
+          Just one second
+        </div>
+        <p>Data are sorting</p>
+      </div>
+    </div>
+
+    <div class="ui positive message" id="video-photo-success">
+      <i class="close icon"></i>
+      <div class="header">
+        Successful
+      </div>
+      <p>Data has been <b>sorted</b></p>
+    </div>
+
+    <div class="ui negative message" id="err">
+      <i class="close icon"></i>
+      <div class="header">
+        Error
+      </div>
+      <p>Smth wrong :/
+      </p></div>
+
     <div id='extract' >
 
     </div>
@@ -41,12 +73,12 @@
     </div>
 
 
-  <div class="ui message" id='console-output'>
+  <!--<div class="ui message" id='console-output'>
       <div class="header">
         Log
       </div>
       <p></p>
-    </div>
+    </div>-->
   <script src='index.js'></script>
 </body>
 

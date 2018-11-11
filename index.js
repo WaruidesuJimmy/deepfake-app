@@ -43,10 +43,10 @@ $('#display-video-photo').on('click', () => {
 })
 
 $('#send-button-video-photo').on('click', ()=>{
-   let dir = $('#path-video-photo').val();
+   let path = $('#path-video-photo').val();
    let name = $('#name-video-photo').val();
-   let data = [dir, name];
-   console.log(dir);
+   let data = {path, name};
+   console.log(data);
    $('#video-photo-loading').show();
    ipcRenderer.send('load-raw-data', data)
 })

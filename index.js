@@ -48,11 +48,7 @@ $('#send-button-video-photo').on('click', ()=>{
    let data = {path, name};
    console.log(data);
    $('#video-photo-loading').show();
-<<<<<<< HEAD
-   ipcRenderer.send('load-raw-data', {path: dir, name: ''})
-=======
    ipcRenderer.send('load-raw-data', data)
->>>>>>> 30bfebb10d8cec1b19c14212799ca9184c5fe71b
 })
 
 $('#video-photo-loading').hide()
@@ -60,10 +56,6 @@ $('#video-photo-success').hide()
 $('#err').hide()
 
 
-<<<<<<< HEAD
-
-=======
->>>>>>> 30bfebb10d8cec1b19c14212799ca9184c5fe71b
 ipcRenderer.on('load-raw-data', (e, data)=>{
    $('#video-photo-success').show()
    $('#video-photo-loading').hide()
@@ -76,16 +68,12 @@ $('#display-extract').on('click', () => {
    ipcRenderer.send('extract-load')
    hideAll()
    $('#extract').show()
-<<<<<<< HEAD
-   ipcRenderer.send('extract-load')
-=======
    $('#video-photo-loading').show()
 })
 
 ipcRenderer.on('extract-load', (e, data)=>{
    $('#video-photo-loading').hide()
    //
->>>>>>> 30bfebb10d8cec1b19c14212799ca9184c5fe71b
 })
 
 

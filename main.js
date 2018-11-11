@@ -13,7 +13,7 @@ const fileExtension = require('file-extension')
 
 
 const dir_to_raw_videos = __dirname + '/v1/data/raw-videos/',
-      dir_to_raw_photos = __dirname + '/v1/data/raw-photo/'
+  dir_to_raw_photos = __dirname + '/v1/data/raw-photo/'
 
 
 
@@ -83,7 +83,7 @@ ipcMain.on('extract-load', (e) => {
 
 const loadDirectoriesNames = dir => {
   const directories = fs.readdirSync(dir)
-  return directories.filter(directory => directory!='.DS_Store')
+  return directories.filter(directory => directory != '.DS_Store')
 }
 
 
@@ -95,8 +95,7 @@ ipcMain.on('extarct', (e, data) => {
 })
 
 ipcMain.on('load-raw-data', (e, data) => {
-
-   loadRawData(data)
+  loadRawData(data)
 })
 
 const isImage = file => {
@@ -118,8 +117,6 @@ const isVideo = file => {
 }
 
 const loadRawData = async data => {
-
-  console.log(data)
   const {
     path,
     name
@@ -132,20 +129,64 @@ const loadRawData = async data => {
     if (isImage(file)) images.push(file)
     if (isVideo(file)) videos.push(file)
   })
-  // if (images.length !== 0) copyAll(images, path, dir_to_raw_photos + name)
-  // if (videos.length !== 0) videos.forEach((video) => convertVideoToImages(path + '/' + video, dir_to_raw_photos + name))
+  if (images.length !== 0) copyAll(images, path, dir_to_raw_photos + name)
+  if (videos.length !== 0) videos.forEach((video) => convertVideoToImages(path + '/' + video, dir_to_raw_photos + name))
 
 
 }
 
+const addZeroesToMilliseconds = (ms) => {
+  _ms = ms
+  if (ms<100) _ms = '0' + _ms
+  if (ms<10) _ms = '0' + _ms
+  return _ms
+}
 
-const convertVideoToImages = (video, dstDir) => {
+const addZeroToTimestamp = (tick) => (tick < 10) ? '0' + tick : tick
 
-  const ffmpegProg = spawn('ffmpeg', ['-i', video, dstDir])
+const getTimestamps = (time_offset, fps, frames) => {
+  let timestamps = []
+  let hours = 0,
+    minutes = 0,
+    seconds = 0,
+    milliseconds = 0
+  let timestamp
+  for (let i = 0; i < frames; i++) {
+    hours = addZeroToTimestamp(Math.floor(time_offset / 3600))
+    minutes = addZeroToTimestamp(Math.floor(time_offset / 60) % 60)
+    seconds = addZeroToTimestamp(time_offset - 3600 * hours - minutes * 60)
+    milliseconds = addZeroesToMilliseconds((1000 / fps * i) % 1000)
+    timestamp = (hours !== 0) ? `${hours}:${minutes}:${seconds}.${milliseconds}` : `${minutes}:${seconds}.${milliseconds}`
+    timestamps.push(timestamp)
+    if (i % fps === 0) time_offset++
+  }
+  console.log(timestamps)
+}
 
-  ffmpegProg.stdout.on('data', (data) => {
-    console.log(data)
-  });
+const convertVideoToImages = async (video, dstDir) => {
+
+  const duration = await getVideoDurationInSeconds(video)
+  if (duration === 0 || duration === undefined) throw 'Duration of the video cannot be read!!!'
+  const FPS = 20
+  const frames = duration * FPS
+  const BATCH_SIZE = 100
+  let time_offset = 0
+  let timestamps = []
+  for (let i = 0; i < Math.floor(frames / BATCH_SIZE); i++) {
+    timestamps = getTimestamps(time_offset, FPS, BATCH_SIZE)
+    ffmpeg_fluent(video)
+      .screenshots({
+        timestamps: timestamps,
+        folder: dstDir,
+        filename: `0${i}%i0.png`
+      })
+      .on('end', () => {
+        console.log(`${time_offset*FPS} frames converted`)
+      })
+    timestamps = []
+    time_offset += Math.ceil(BATCH_SIZE / FPS)
+  }
+  console.log('Video to images converted')
 
 
 }

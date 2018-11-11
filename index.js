@@ -17,3 +17,17 @@ $('#ffmpeg').on('click', ()=>{
     let dir = $('#directory_to_videos').val()
     ipcRenderer.send('ffmpeg', dir)
 })
+
+
+$( `.sendFile` ).submit( function ( e ) {
+
+   e.preventDefault();
+
+   if ($( this ).data( 'formstatus' ) !== ' submitting ' ){
+
+      let formData = new FormData( document.getElementById ( e.target.id ) );
+      ipcRenderer.send('videoPhoto', formData)
+
+   }
+
+})

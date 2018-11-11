@@ -9,191 +9,27 @@
     crossorigin="anonymous"></script>
     <script src="https://code.jquery.com/jquery-3.3.1.min.js"></script>
   <script src="semantic/dist/semantic.min.js"></script>
-  <style>
-    #drop_zone {
-  border: 5px solid blue;
-  width:  200px;
-  height: 100px;
-}
-  </style>
+  <style></style>
 </head>
 
 <body>
-  <div class="ui ordered steps">
-    <div class="completed step">
-      <div class="content">
-        <div class="title">Shipping</div>
-        <div class="description">Choose your shipping options</div>
-      </div>
-    </div>
-    <div class="completed step">
-      <div class="content">
-        <div class="title">Billing</div>
-        <div class="description">Enter billing information</div>
-      </div>
-    </div>
-    <div class="active step">
-      <div class="content">
-        <div class="title">Confirm Order</div>
-        <div class="description">Verify order details</div>
-      </div>
-    </div>
-  </div>
 
 
-  <div class="ui indicating progress">
-    <div class="bar"></div>
-    <div class="label">Funding</div>
-  </div>
+  <div class="main">
 
-
-  <div id='main'>
-
-    <!-- <div class="ui segment">
-      <div class="ui two column very relaxed grid">
-        <div class="column">
-            <form class="ui fluid form">
-                <div class="field">
-                  <input type="text" placeholder="First name">
-                  <div class="ui pointing red basic label">
-                    Please enter a value
-                  </div>
-                </div>
-                <div class="ui divider"></div>
-                <div class="field" placeholder="Last Name">
-                  <div class="ui pointing below red basic label">
-                    Please enter a value
-                  </div>
-                  <input type="text">
-                </div>
-                <div class="ui divider"></div>
-                <div class="inline field">
-                  <input type="text" placeholder="Username">
-                  <div class="ui left pointing red basic label">
-                    That name is taken!
-                  </div>
-                </div>
-                <div class="ui divider"></div>
-                <div class="inline field">
-                  <div class="ui right pointing red basic label">
-                    Your password must be 6 characters or more
-                  </div>
-                  <input type="password">
-                </div>
-              </form>
-              <button class="ui button">
-                  Button
-                </button>
-                <div class="ui indicating progress">
-                    <div class="bar"></div>
-                    <div class="label">Funding</div>
-                  </div>
-        </div>
-        <div class="column" >
-            <form class="ui fluid form">
-                <div class="field">
-                  <input type="text" placeholder="First name">
-                  <div class="ui pointing red basic label">
-                    Please enter a value
-                  </div>
-                </div>
-                <div class="ui divider"></div>
-                <div class="field" placeholder="Last Name">
-                  <div class="ui pointing below red basic label">
-                    Please enter a value
-                  </div>
-                  <input type="text">
-                </div>
-                <div class="ui divider"></div>
-                <div class="inline field">
-                  <input type="text" placeholder="Username">
-                  <div class="ui left pointing red basic label">
-                    That name is taken!
-                  </div>
-                </div>
-                <div class="ui divider"></div>
-                <div class="inline field">
-                  <div class="ui right pointing red basic label">
-                    Your password must be 6 characters or more
-                  </div>
-                  <input type="password">
-                </div>
-              </form>
-              <button class="ui button">
-                  Button
-                </button>
-                <div class="ui indicating progress">
-                    <div class="bar"></div>
-                    <div class="label">Funding</div>
-                  </div>
-        </div>
-      </div>
-      <div class="ui vertical divider">
-        and
-      </div>
-    </div> -->
-    <div class="ui input">
-        <input type="text" placeholder="name">
-      </div>
-
-      <div class="ui input" >
-          <input type="text" id='directory_to_videos' placeholder="full path to directory with videos">
-        </div>
-
-        <button class="ui button" id='ffmpeg'>
-            Convert video
-          </button>
-          <div class="ui indicating progress" data-value="1" data-total="200" id="example5">
-              <div class="bar">
-                <div class="progress"></div>
-              </div>
-              <div class="label">Waiting for you to press button</div>
-            </div>
-
-    <!-- <div class="ui floating labeled icon dropdown button">
-        <i class="filter icon"></i>
-        <span class="text">Filter</span>
-        <div class="menu">
-          <div class="header">
-            Search Issues
-          </div>
-          <div class="ui left icon input">
-            <i class="search icon"></i>
-            <input type="text" name="search" placeholder="Search...">
-          </div>
-          <div class="header">
-            <i class="tags icon"></i>
-            Filter by tag
-          </div>
-          <div class="item">
-            <div class="ui red empty circular label"></div>
-            Important
-          </div>
-          <div class="item">
-            <div class="ui blue empty circular label"></div>
-            Announcement
-          </div>
-          <div class="item">
-            <div class="ui black empty circular label"></div>
-            Discussion
-          </div>
-        </div>
-      </div> -->
-      <!-- <div id="drop_zone" ondrop="dropHandler(event);" ondragover="dragOverHandler(event);">
-          <p>Drag one or more files to this Drop Zone ...</p>
-        </div> -->
-
+    <div id='video-photo' ></div>
+    <div id='extract' ></div>
+    <div id='train' ></div>
+    <div id='convert' ></div>
+    <div id='photo-video' ></div>
 
   </div>
-
-
-
 
   <div class="ui message" id='console-output'>
       <div class="header">
-        Changes in Service
+        Log
       </div>
-      <p>We just updated our privacy policy here to better service our customers. We recommend reviewing the changes.</p>
+      <p></p>
     </div>
   <script src='index.js'></script>
 </body>

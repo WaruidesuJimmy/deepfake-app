@@ -8,6 +8,7 @@ const ffmpeg_fluent = require('fluent-ffmpeg');
 const command = ffmpeg_fluent();
 const getVideoDurationInSeconds = require('get-video-duration')
 const fs = require('fs')
+const path = require('path')
 const fileExtension = require('file-extension')
 
 
@@ -77,20 +78,13 @@ ipcMain.on('extarct', (e, data) => {
   pyProg.stdout.on('data', function (data) {});
 })
 
-ipcMain.on('ffmpeg', (e, data) => {
+ipcMain.on('load-raw-data', (e, data) => {
+  loadRawData(data)
 
-  const {path, name} = data
-  let videos = []
-  let images = []
 
-  fs.readdir(dir, (err, files) => {
-    files.forEach((file) => {
-      if (isImage(file)) images.push(file)
-      if (isVideo(file)) videos.push(file)
-    })
-  })
 
-  
+
+
   // try {
   //   var process = new ffmpeg('video/sobolev.mp4');
   //   process.then(function (video) {
@@ -110,35 +104,86 @@ ipcMain.on('ffmpeg', (e, data) => {
   //   console.log(e.code);
   //   console.log(e.msg);
   // }
-  getVideoDurationInSeconds.getVideoDurationInSeconds('video/sobolev.mp4').then((_duration) => {
-    console.log(_duration)
-    ffmpeg_fluent('video/sobolev.mp4')
-      .on('filenames', function (filenames) {
-        console.log('Will generate ' + filenames.length)
-      })
-      .on('end', function () {
-        console.log('Screenshots taken');
-      })
-      .screenshots({
-        count: _duration,
-        folder: 'ffmpeg/'
-      })
-  }).catch((err) => console.log(err))
+  // getVideoDurationInSeconds.getVideoDurationInSeconds('video/sobolev.mp4').then((_duration) => {
+  //   console.log(_duration)
+  //   ffmpeg_fluent('video/sobolev.mp4')
+  //     .on('filenames', function (filenames) {
+  //       console.log('Will generate ' + filenames.length)
+  //     })
+  //     .on('end', function () {
+  //       console.log('Screenshots taken');
+  //     })
+  //     .screenshots({
+  //       count: _duration,
+  //       folder: 'ffmpeg/'
+  //     })
+  // }).catch((err) => console.log(err))
 
 })
 
 const isImage = file => {
   const image_pattern = ['png', 'jpg', 'jpeg']
+  let isImg = false
   image_pattern.forEach((ext) => {
-    if (fileExtension(file) === ext) return true
+    if (fileExtension(file) === ext) isImg = true
   })
-  return false
+  return isImg
 }
 
 const isVideo = file => {
   const image_pattern = ['mp4', 'avi']
+  let isVid = false
   image_pattern.forEach((ext) => {
-    if (fileExtension(file) === ext) return true
+    if (fileExtension(file) === ext) isVid = true
   })
-  return false
+  return isVid
 }
+
+const loadRawData = async data => {
+  const {
+    path,
+    name
+  } = data
+  let videos = []
+  let images = []
+  let files = await readdirAsync(path)
+
+  files.forEach((file) => {
+    if (isImage(file)) images.push(file)
+    if (isVideo(file)) videos.push(file)
+  })
+  copyAll(images, path,  __dirname + `/v1/data/raw-photo/${name}`)
+
+}
+
+
+
+const readdirAsync = (path) => {
+  return new Promise((resolve, reject) => {
+    fs.readdir(path, (err, files) => {
+      if (err) reject(err)
+      resolve(files)
+    })
+  })
+}
+
+const copyFile = (srcDir, destDir) => {
+  let readStream = fs.createReadStream(srcDir);
+  console.log('copying...' + srcDir + ' to ' + destDir)
+
+  readStream.once('error', (err) => {
+    throw err
+  })
+  // readStream.once('end', () => {
+  //   console.log('done copying');
+  // })
+  readStream.pipe(fs.createWriteStream(destDir));
+}
+
+const copyAll = (files, srcDir, destDir) =>
+  fs.access(destDir, err => {
+    if (err) fs.mkdirSync(destDir);
+    files.forEach((file) =>
+      copyFile(path.join(srcDir, file), path.join(destDir, file))
+    )
+  })

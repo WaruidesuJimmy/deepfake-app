@@ -26,7 +26,7 @@ $( `.sendFile` ).submit( function ( e ) {
    if ($( this ).data( 'formstatus' ) !== ' submitting ' ){
 
       let formData = new FormData( document.getElementById ( e.target.id ) );
-      ipcRenderer.send('videoPhoto', formData)
+      ipcRenderer.send('ffmpeg', {path: '/Users/waruidesujimmy/PycharmProjects/faceswap/video'})
 
    }
 

@@ -76,12 +76,15 @@ app.on('activate', () => {
 })
 
 ipcMain.on('extract-load', (e) => {
-  console.log(loadDirectoriesNames(dir_to_raw_photos))
-  win.webContents.send('extract-load', loadDirectoriesNames(dir_to_raw_photos))
+  const dirNames = loadDirectoriesNames(dir_to_raw_videos)
+  win.webContents.send('extract-load', dirNames)
 })
 
 
-const loadDirectoriesNames = async dir => await readdirAsync(dir)
+const loadDirectoriesNames = dir => {
+  const directories = fs.readdirSync(dir)
+  return directories.filter(directory => directory!='.DS_Store')
+}
 
 
 ipcMain.on('extarct', (e, data) => {
@@ -92,7 +95,8 @@ ipcMain.on('extarct', (e, data) => {
 })
 
 ipcMain.on('load-raw-data', (e, data) => {
-  loadRawData(data)
+
+   loadRawData(data)
 })
 
 const isImage = file => {
@@ -115,6 +119,7 @@ const isVideo = file => {
 
 const loadRawData = async data => {
 
+  console.log(data)
   const {
     path,
     name
@@ -122,13 +127,13 @@ const loadRawData = async data => {
   let videos = []
   let images = []
   let files = await readdirAsync(path)
-
+  console.log(files)
   files.forEach((file) => {
     if (isImage(file)) images.push(file)
     if (isVideo(file)) videos.push(file)
   })
-  if (images.length !== 0) copyAll(images, path, dir_to_raw_photos + name)
-  if (videos.length !== 0) videos.forEach((video) => convertVideoToImages(path + '/' + video, dir_to_raw_photos + name))
+  // if (images.length !== 0) copyAll(images, path, dir_to_raw_photos + name)
+  // if (videos.length !== 0) videos.forEach((video) => convertVideoToImages(path + '/' + video, dir_to_raw_photos + name))
 
 
 }

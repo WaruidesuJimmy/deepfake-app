@@ -46,7 +46,7 @@ $('#send-button-video-photo').on('click', ()=>{
    let dir = $('#path-video-photo').val();
    console.log(dir);
    $('#video-photo-loading').show();
-   ipcRenderer.send('load-raw-data', dir)
+   ipcRenderer.send('load-raw-data', {path: dir, name: ''})
 })
 
 $('#video-photo-loading').hide()
@@ -54,11 +54,6 @@ $('#video-photo-success').hide()
 $('#err').hide()
 
 
-<<<<<<< HEAD
-      let formData = new FormData( document.getElementById ( e.target.id ) );
-      ipcRenderer.send('load-raw-data', {path: '/Users/waruidesujimmy/Documents/deepfake-app/v1/data/raw-videos/ikakprosto'})
-=======
->>>>>>> 42b4084c788ac643528f6fe6cda6957baa21ac9f
 
 ipcRenderer.on('load-raw-data', (e, data)=>{
    $('#video-photo-success').show()
@@ -71,6 +66,7 @@ ipcRenderer.on('load-raw-data', (e, data)=>{
 $('#display-extract').on('click', () => {
    hideAll()
    $('#extract').show()
+   ipcRenderer.send('extract-load')
 })
 
 $('#display-train').on('click', () => {

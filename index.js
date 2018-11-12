@@ -61,6 +61,18 @@ ipcRenderer.on('load-raw-data', (e, data)=>{
    $('#video-photo-loading').hide()
 })
 
+
+
+
+$('#display-extract').on('click', () => {
+   ipcRenderer.send('extract-load')
+
+   hideAll()
+   $('#extract').show()
+   $('#video-photo-loading').show()
+
+})
+
 ipcRenderer.on('extract-load', (e, data)=> {
 
    $('#video-photo-loading').hide()
@@ -85,110 +97,19 @@ ipcRenderer.on('extract-load', (e, data)=> {
    }
 })
 
-ipcRenderer.on('train-load', (e, data)=> {
 
-   $('#video-photo-loading').hide()
-   let train = document.getElementById('train')
-
-   for (let text of data) {
-      let wrapp = document.createElement('div')
-      let checkbox = document.createElement('div');
-      checkbox.className = 'ui checkbox'
-      let input = document.createElement('input');
-      input.type = 'checkbox'
-      input.name = text
-      input.id = text
-      let label = document.createElement('label');
-      label.htmlFor = text
-      label.innerText = text
-
-      checkbox.appendChild(input)
-      checkbox.appendChild(label)
-      wrapp.appendChild(checkbox)
-      train.appendChild(wrapp)
-   }
-})
-
-ipcRenderer.on('convert-load', (e, data)=> {
-
-   $('#video-photo-loading').hide()
-   let convert = document.getElementById('convert')
-
-   for (let text of data) {
-      let wrapp = document.createElement('div')
-      let checkbox = document.createElement('div');
-      checkbox.className = 'ui checkbox'
-      let input = document.createElement('input');
-      input.type = 'checkbox'
-      input.name = text
-      input.id = text
-      let label = document.createElement('label');
-      label.htmlFor = text
-      label.innerText = text
-
-      checkbox.appendChild(input)
-      checkbox.appendChild(label)
-      wrapp.appendChild(checkbox)
-      convert.appendChild(wrapp)
-   }
-})
-
-ipcRenderer.on('photo-video-load', (e, data)=> {
-
-   $('#video-photo-loading').hide()
-   let photo = document.getElementById('photo-video')
-
-   for (let text of data) {
-      let wrapp = document.createElement('div')
-      let checkbox = document.createElement('div');
-      checkbox.className = 'ui checkbox'
-      let input = document.createElement('input');
-      input.type = 'checkbox'
-      input.name = text
-      input.id = text
-      let label = document.createElement('label');
-      label.htmlFor = text
-      label.innerText = text
-
-      checkbox.appendChild(input)
-      checkbox.appendChild(label)
-      wrapp.appendChild(checkbox)
-      photo.appendChild(wrapp)
-   }
-})
-
-
-
-
-$('#display-extract').on('click', () => {
-   ipcRenderer.send('extract-load')
-
-   hideAll()
-   $('#extract').show()
-   $('#video-photo-loading').show()
-
-})
 
 $('#display-train').on('click', () => {
-   ipcRenderer.send('train-load')
-
    hideAll()
    $('#train').show()
-   $('#video-photo-loading').show()
 })
 
 $('#display-convert').on('click', () => {
-   ipcRenderer.send('convert-load')
-
    hideAll()
    $('#convert').show()
-   $('#video-photo-loading').show()
 })
 
 $('#display-photo-video').on('click', () => {
-   ipcRenderer.send('photo-video-load')
-
    hideAll()
    $('#photo-video').show()
-   $('#video-photo-loading').show()
 })

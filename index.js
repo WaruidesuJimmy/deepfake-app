@@ -65,7 +65,7 @@ ipcRenderer.on('load-raw-data', (e, data)=>{
 
 
 $('#display-extract').on('click', () => {
-   ipcRenderer.send('extract-load')
+   ipcRenderer.send('extract')
    hideAll()
    $('#extract').show()
    $('#video-photo-loading').show()

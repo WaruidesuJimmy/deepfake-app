@@ -88,7 +88,7 @@ const loadDirectoriesNames = dir => {
 
 ipcMain.on('extract', (e, data) => {
 
-  extract({name: 'sobolev', pathToFaces: '/Users/waruidesujimmy/Documents/deepfake-app/v1/data/raw-photo/sobolev/sobolev-0.png'})
+  extract({name: 'sobolev', pathToFaces: '/Users/waruidesujimmy/Documents/deepfake-app/v1/data/raw-photo/sobolev'})
 })
 
 ipcMain.on('load-raw-data', (e, data) => {
@@ -98,25 +98,29 @@ ipcMain.on('load-raw-data', (e, data) => {
 const extract = async (data) => {
   const {
     name,
-    pathToFaces,
-  }
+    pathToFaces
+  } = data
   let files = []
   let images = []
 
-  if (pathToFacesPattern) files = await readdirAsync(pathToFaces)
+  if (pathToFaces) files = await readdirAsync(pathToFaces)
 
   files.forEach((file) => {
     if(isImage(file)) images.push(file)
   })
 
+  if(images.length >0 ) images.map((image) => pathToFaces + image)
+  if(images.length>10) images = images.slice(0, 9)
 
   let arguments = ['v1/faceswap.py', 'extract', '-i']
 
   arguments.push(dir_to_raw_photos + name, '-o', dir_to_extracted + name)
 
-  if (faces.length > 0) arguments.push('-f', ...images)
+  if (images.length > 0) arguments.push('-f', ...images)
+  console.log(arguments)
 
-  const pyProg = spawn('python', arguments);
+  const pyProg = spawn('python', arguments)
+
 
   pyProg.stdout.on('data', data => {
     console.log(data)

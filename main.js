@@ -87,7 +87,6 @@ const loadDirectoriesNames = dir => {
 
 
 ipcMain.on('extract', (e, data) => {
-
   extract({name: 'sobolev', pathToFaces: '/Users/waruidesujimmy/Documents/deepfake-app/v1/data/raw-photo/sobolev'})
 })
 
@@ -98,7 +97,8 @@ ipcMain.on('load-raw-data', (e, data) => {
 const extract = async (data) => {
   const {
     name,
-    pathToFaces
+    pathToFaces, 
+    detector
   } = data
   let files = []
   let images = []
@@ -109,21 +109,23 @@ const extract = async (data) => {
     if(isImage(file)) images.push(file)
   })
 
-  if(images.length >0 ) images.map((image) => pathToFaces + image)
+
+  if (detector === 'hog' || detector === 'cnn') arguments.push('-D', detector)
   if(images.length>10) images = images.slice(0, 9)
+  if(images.length > 0 ) images.forEach((image, index) => images[index] = pathToFaces + '/' + image)
 
-  let arguments = ['v1/faceswap.py', 'extract', '-i']
+  let arguments = ['v1/faceswap.py', 'extract']
 
-  arguments.push(dir_to_raw_photos + name, '-o', dir_to_extracted + name)
+  arguments.push('-i', dir_to_raw_photos + name, '-o', dir_to_extracted + name)
 
   if (images.length > 0) arguments.push('-f', ...images)
+
   console.log(arguments)
 
   const pyProg = spawn('python', arguments)
 
-
   pyProg.stdout.on('data', data => {
-    console.log(data)
+    console.log(data.toString())
   })
 }
 

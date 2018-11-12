@@ -16,7 +16,8 @@ const fileExtension = require('file-extension')
 
 const dir_to_raw_videos = __dirname + '/v1/data/raw-videos/',
   dir_to_raw_photos = __dirname + '/v1/data/raw-photo/',
-  dir_to_extracted = __dirname + '/v1/data/extracted/'
+  dir_to_extracted = __dirname + '/v1/data/extracted/',
+  dir_to_models = __dirname + '/v1/models/'
 
 
 
@@ -80,22 +81,43 @@ ipcMain.on('extract-load', (e) => {
 })
 
 
-const loadDirectoriesNames = dir => {
-  const directories = fs.readdirSync(dir)
-  return directories.filter(directory => directory != '.DS_Store')
-}
-
-
 ipcMain.on('extract', (e, data) => {
-  extract({
-    name: 'sobolev',
-    pathToFaces: '/Users/waruidesujimmy/Documents/deepfake-app/v1/data/raw-photo/sobolev'
-  })
+  extract(data)
+})
+
+ipcMain.on('train', (e, data) => {
+  train(data)
+})
+
+ipcMain.on('train-load', e => {
+  const dirNames = loadDirectoriesNames(dir_to_extracted)
+  win.webContents.send('train-load', dirNames)
+  train({person_A: 'sobolev', person_B: 'ikakprosto', trainer: "GAN"})
 })
 
 ipcMain.on('load-raw-data', (e, data) => {
   loadRawData(data)
 })
+
+
+const train = ({person_A, person_B, trainer, BATCH_SIZE}) => {
+  let arguments = []
+  // arguments.push('-s', 100)
+  if (trainer === 'LowMem' || trainer === 'GAN') arguments.push('-t', trainer)
+  if (!isNaN(BATCH_SIZE)) arguments.push('-bs', BATCH_SIZE)
+  const MODEL_DIR = dir_to_models + `${person_A}-${person_B}`
+  const INPUT_A = dir_to_extracted + person_A
+  const INPUT_B = dir_to_extracted + person_B
+  arguments.push('-A', INPUT_A, '-B', INPUT_B, '-m', MODEL_DIR)
+  console.log(arguments)
+
+
+}
+
+const loadDirectoriesNames = dir => {
+  const directories = fs.readdirSync(dir)
+  return directories.filter(directory => directory != '.DS_Store')
+}
 
 const extract = async (data) => {
   const {
@@ -117,7 +139,7 @@ const extract = async (data) => {
   // if(images.length>10) images = images.slice(0, 9)
   // if(images.length > 0 ) images.forEach((image, index) => images[index] = pathToFaces + '/' + image)
 
-  let arguments = ['v1/faceswap.py',  'extract']
+  let arguments = ['v1/faceswap.py', 'extract']
 
   arguments.push('-i', dir_to_raw_photos + name, '-o', dir_to_extracted + name)
 
@@ -127,12 +149,12 @@ const extract = async (data) => {
 
 
   pyProg.stdout.on('data', data => {
-    console.log(`///${data.toString()}`)
-  })
-  .on('end', () => {
-    console.log('complete')
-    win.webContents.send('on-complete')
-  })
+      console.log(`///${data.toString()}`)
+    })
+    .on('end', () => {
+      console.log('complete')
+      win.webContents.send('on-complete')
+    })
 }
 
 

@@ -5,17 +5,17 @@ const $ = require("jquery");
 //const log_div = document.getElementById('console-output').getElementsByTagName('p')[0]
 
 ipcRenderer.on('log', (e, data) => {
-    log_div.innerText = data
+   log_div.innerText = data
 })
 
 ipcRenderer.on('ffmpeg', (e, data)=>{
-    log_div.innerText = data
-    // console.log(data)
+   log_div.innerText = data
+   // console.log(data)
 })
 
 $('#ffmpeg').on('click', ()=>{
-    let dir = $('#directory_to_videos').val()
-    ipcRenderer.send('ffmpeg', dir)
+   let dir = $('#directory_to_videos').val()
+   ipcRenderer.send('ffmpeg', dir)
 })
 
 ipcRenderer.on('error', (e, data)=>{
@@ -24,8 +24,8 @@ ipcRenderer.on('error', (e, data)=>{
 })
 
 /**
-* js for menu
-**/
+ * js for menu
+ **/
 
 function hideAll() {
    $('#video-photo').hide()
@@ -65,17 +65,41 @@ ipcRenderer.on('load-raw-data', (e, data)=>{
 
 
 $('#display-extract').on('click', () => {
+<<<<<<< HEAD
    ipcRenderer.send('extract')
+=======
+   ipcRenderer.send('extract-load')
+
+>>>>>>> 74b1160ffa9c4f9571e827c64c7bf8d423bb9d61
    hideAll()
    $('#extract').show()
    $('#video-photo-loading').show()
+
 })
 
-ipcRenderer.on('extract-load', (e, data)=>{
+ipcRenderer.on('extract-load', (e, data)=> {
+
    $('#video-photo-loading').hide()
-   //
-})
+   let extract = document.getElementById('extract')
 
+   for (let text of data) {
+      let wrapp = document.createElement('div')
+      let checkbox = document.createElement('div');
+      checkbox.className = 'ui checkbox'
+      let input = document.createElement('input');
+      input.type = 'checkbox'
+      input.name = text
+      input.id = text
+      let label = document.createElement('label');
+      label.htmlFor = text
+      label.innerText = text
+
+      checkbox.appendChild(input)
+      checkbox.appendChild(label)
+      wrapp.appendChild(checkbox)
+      extract.appendChild(wrapp)
+   }
+})
 
 
 

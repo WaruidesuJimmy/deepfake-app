@@ -87,7 +87,10 @@ const loadDirectoriesNames = dir => {
 
 
 ipcMain.on('extract', (e, data) => {
-  extract({name: 'sobolev', pathToFaces: '/Users/waruidesujimmy/Documents/deepfake-app/v1/data/raw-photo/sobolev'})
+  extract({
+    name: 'sobolev',
+    pathToFaces: '/Users/waruidesujimmy/Documents/deepfake-app/v1/data/raw-photo/sobolev'
+  })
 })
 
 ipcMain.on('load-raw-data', (e, data) => {
@@ -97,35 +100,38 @@ ipcMain.on('load-raw-data', (e, data) => {
 const extract = async (data) => {
   const {
     name,
-    pathToFaces, 
+    pathToFace,
     detector
   } = data
   let files = []
   let images = []
 
-  if (pathToFaces) files = await readdirAsync(pathToFaces)
+  // if (pathToFaces) files = await readdirAsync(pathToFaces)
 
-  files.forEach((file) => {
-    if(isImage(file)) images.push(file)
-  })
+  // files.forEach((file) => {
+  //   if(isImage(file)) images.push(file)
+  // })
 
 
   if (detector === 'hog' || detector === 'cnn') arguments.push('-D', detector)
-  if(images.length>10) images = images.slice(0, 9)
-  if(images.length > 0 ) images.forEach((image, index) => images[index] = pathToFaces + '/' + image)
+  // if(images.length>10) images = images.slice(0, 9)
+  // if(images.length > 0 ) images.forEach((image, index) => images[index] = pathToFaces + '/' + image)
 
-  let arguments = ['v1/faceswap.py', 'extract']
+  let arguments = ['v1/faceswap.py',  'extract']
 
   arguments.push('-i', dir_to_raw_photos + name, '-o', dir_to_extracted + name)
 
-  if (images.length > 0) arguments.push('-f', ...images)
-
-  console.log(arguments)
+  if (pathToFace) arguments.push('-f', pathToFace)
 
   const pyProg = spawn('python', arguments)
 
+
   pyProg.stdout.on('data', data => {
-    console.log(data.toString())
+    console.log(`///${data.toString()}`)
+  })
+  .on('end', () => {
+    console.log('complete')
+    win.webContents.send('on-complete')
   })
 }
 

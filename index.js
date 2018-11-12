@@ -73,13 +73,12 @@ $('#display-extract').on('click', () => {
 
 })
 
-ipcRenderer.on('extract-load', (e, data)=>{
+ipcRenderer.on('extract-load', (e, data)=> {
 
    $('#video-photo-loading').hide()
-
    let extract = document.getElementById('extract')
 
-   for(let text of data){
+   for (let text of data) {
       let wrapp = document.createElement('div')
       let checkbox = document.createElement('div');
       checkbox.className = 'ui checkbox'
@@ -88,7 +87,7 @@ ipcRenderer.on('extract-load', (e, data)=>{
       input.name = text
       input.id = text
       let label = document.createElement('label');
-      label.htmlFor  = text
+      label.htmlFor = text
       label.innerText = text
 
       checkbox.appendChild(input)
@@ -96,9 +95,7 @@ ipcRenderer.on('extract-load', (e, data)=>{
       wrapp.appendChild(checkbox)
       extract.appendChild(wrapp)
    }
-
 })
-
 
 
 

@@ -15,7 +15,8 @@ const fileExtension = require('file-extension')
 
 
 const dir_to_raw_videos = __dirname + '/v1/data/raw-videos/',
-  dir_to_raw_photos = __dirname + '/v1/data/raw-photo/'
+  dir_to_raw_photos = __dirname + '/v1/data/raw-photo/',
+  dir_to_extracted = __dirname + '/v1/data/extracted/'
 
 
 
@@ -41,10 +42,6 @@ function createWindow() {
 
   // Открыть средства разработчика.
   win.webContents.openDevTools()
-
-  cmd.get('python faceswap/faceswap.py extract -h', (err, data, stderr) => {
-    win.webContents.send('log', data)
-  })
 
   // Вызывается, когда окно будет закрыто.
   win.on('closed', () => {
@@ -89,16 +86,43 @@ const loadDirectoriesNames = dir => {
 }
 
 
-ipcMain.on('extarct', (e, data) => {
+ipcMain.on('extract', (e, data) => {
 
-  const pyProg = spawn('python', ['faceswap/faceswap.py', 'extract', '-i', 'faceswap/photo/sobolev', '-o', 'extract', '-f', 'faceswap/photo/sobolev/sobolev-0.png']);
-
-  pyProg.stdout.on('data', function (data) {});
+  extract({name: 'sobolev', pathToFaces: '/Users/waruidesujimmy/Documents/deepfake-app/v1/data/raw-photo/sobolev/sobolev-0.png'})
 })
 
 ipcMain.on('load-raw-data', (e, data) => {
   loadRawData(data)
 })
+
+const extract = async (data) => {
+  const {
+    name,
+    pathToFaces,
+  }
+  let files = []
+  let images = []
+
+  if (pathToFacesPattern) files = await readdirAsync(pathToFaces)
+
+  files.forEach((file) => {
+    if(isImage(file)) images.push(file)
+  })
+
+
+  let arguments = ['v1/faceswap.py', 'extract', '-i']
+
+  arguments.push(dir_to_raw_photos + name, '-o', dir_to_extracted + name)
+
+  if (faces.length > 0) arguments.push('-f', ...images)
+
+  const pyProg = spawn('python', arguments);
+
+  pyProg.stdout.on('data', data => {
+    console.log(data)
+  })
+}
+
 
 const isImage = file => {
   const image_pattern = ['png', 'jpg', 'jpeg']
@@ -133,10 +157,7 @@ const loadRawData = async data => {
     if (isVideo(file)) videos.push(file)
   })
   if (images.length !== 0) copyAll(images, path, dir_to_raw_photos + name)
-  if (videos.length !== 0) videos.forEach((video) =>  convertVideoToImages(path + '/' + video, dir_to_raw_photos + name))
-  console.log('Raw data succesfully sorted')
-
-
+  if (videos.length !== 0) videos.forEach((video) => convertVideoToImages(path + '/' + video, dir_to_raw_photos + name))
 }
 
 const addZeroesToMilliseconds = (ms) => {

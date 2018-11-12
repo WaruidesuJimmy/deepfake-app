@@ -27,6 +27,8 @@ ipcRenderer.on('error', (e, data)=>{
  * js for menu
  **/
 
+hideAll()
+
 function hideAll() {
    $('#video-photo').hide()
    $('#extract').hide()
@@ -64,15 +66,17 @@ ipcRenderer.on('load-raw-data', (e, data)=>{
 ipcRenderer.on('extract-load', (e, data)=> {
 
    $('#video-photo-loading').hide()
-   let extract = document.getElementById('extract')
+   let extract = document.getElementById('extract-content')
+   extract.innerHTML = ''
 
    for (let text of data) {
       let wrapp = document.createElement('div')
+      wrapp.className = 'field'
       let checkbox = document.createElement('div');
-      checkbox.className = 'ui checkbox'
+      checkbox.className = 'ui radio checkbox'
       let input = document.createElement('input');
-      input.type = 'checkbox'
-      input.name = text
+      input.type = 'radio'
+      input.name = 'extract'
       input.id = text
       let label = document.createElement('label');
       label.htmlFor = text
@@ -83,12 +87,14 @@ ipcRenderer.on('extract-load', (e, data)=> {
       wrapp.appendChild(checkbox)
       extract.appendChild(wrapp)
    }
+
 })
 
 ipcRenderer.on('train-load', (e, data)=> {
 
    $('#video-photo-loading').hide()
    let train = document.getElementById('train')
+   train.innerHTML = ''
 
    for (let text of data) {
       let wrapp = document.createElement('div')
@@ -113,6 +119,7 @@ ipcRenderer.on('convert-load', (e, data)=> {
 
    $('#video-photo-loading').hide()
    let convert = document.getElementById('convert')
+   convert.innerHTML = ''
 
    for (let text of data) {
       let wrapp = document.createElement('div')
@@ -137,6 +144,7 @@ ipcRenderer.on('photo-video-load', (e, data)=> {
 
    $('#video-photo-loading').hide()
    let photo = document.getElementById('photo-video')
+   photo.innerHTML = ''
 
    for (let text of data) {
       let wrapp = document.createElement('div')
@@ -166,6 +174,21 @@ $('#display-extract').on('click', () => {
    hideAll()
    $('#extract').show()
    $('#video-photo-loading').show()
+
+})
+
+$('#extract-send').on('click', () => {
+   $('#video-photo-loading').show()
+   let extract = document.getElementById('extract-content')
+   let elems = extract.getElementsByTagName('input')
+   let check = '';
+
+   for(let elem of elems)
+      if(elem.checked)
+         check = elem.id
+
+   ipcRenderer.send('extract', check)
+
 
 })
 

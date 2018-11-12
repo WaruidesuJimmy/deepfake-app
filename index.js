@@ -48,7 +48,11 @@ $('#send-button-video-photo').on('click', ()=>{
    let data = {path, name};
    console.log(data);
    $('#video-photo-loading').show();
+<<<<<<< HEAD
+   ipcRenderer.send('load-raw-data', {path: dir, name: ''})
+=======
    ipcRenderer.send('load-raw-data', data)
+>>>>>>> 30bfebb10d8cec1b19c14212799ca9184c5fe71b
 })
 
 $('#video-photo-loading').hide()
@@ -56,6 +60,10 @@ $('#video-photo-success').hide()
 $('#err').hide()
 
 
+<<<<<<< HEAD
+
+=======
+>>>>>>> 30bfebb10d8cec1b19c14212799ca9184c5fe71b
 ipcRenderer.on('load-raw-data', (e, data)=>{
    $('#video-photo-success').show()
    $('#video-photo-loading').hide()
@@ -66,36 +74,20 @@ ipcRenderer.on('load-raw-data', (e, data)=>{
 
 $('#display-extract').on('click', () => {
    ipcRenderer.send('extract-load')
-
    hideAll()
    $('#extract').show()
+<<<<<<< HEAD
+   ipcRenderer.send('extract-load')
+=======
    $('#video-photo-loading').show()
-
 })
 
-ipcRenderer.on('extract-load', (e, data)=> {
-
+ipcRenderer.on('extract-load', (e, data)=>{
    $('#video-photo-loading').hide()
-   let extract = document.getElementById('extract')
-
-   for (let text of data) {
-      let wrapp = document.createElement('div')
-      let checkbox = document.createElement('div');
-      checkbox.className = 'ui checkbox'
-      let input = document.createElement('input');
-      input.type = 'checkbox'
-      input.name = text
-      input.id = text
-      let label = document.createElement('label');
-      label.htmlFor = text
-      label.innerText = text
-
-      checkbox.appendChild(input)
-      checkbox.appendChild(label)
-      wrapp.appendChild(checkbox)
-      extract.appendChild(wrapp)
-   }
+   //
+>>>>>>> 30bfebb10d8cec1b19c14212799ca9184c5fe71b
 })
+
 
 
 

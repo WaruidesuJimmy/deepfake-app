@@ -23,6 +23,12 @@ ipcRenderer.on('error', (e, data)=>{
    $('#video-photo-loading').hide()
 })
 
+ipcRenderer.on('success', (e, data)=>{
+   hideAll()
+   $('#video-photo-loading').hide()
+   $('#video-photo-success').show()
+})
+
 /**
  * js for menu
  **/
@@ -93,16 +99,19 @@ ipcRenderer.on('extract-load', (e, data)=> {
 ipcRenderer.on('train-load', (e, data)=> {
 
    $('#video-photo-loading').hide()
-   let train = document.getElementById('train')
-   train.innerHTML = ''
+   let train0 = document.getElementById('train-content0')
+   let train1 = document.getElementById('train-content1')
+   train0.innerHTML = ''
+   train1.innerHTML = ''
 
-   for (let text of data) {
+   for (let text of data[0]) {
       let wrapp = document.createElement('div')
+      wrapp.className = 'field'
       let checkbox = document.createElement('div');
-      checkbox.className = 'ui checkbox'
+      checkbox.className = 'ui radio checkbox'
       let input = document.createElement('input');
-      input.type = 'checkbox'
-      input.name = text
+      input.type = 'radio'
+      input.name = 'extract'
       input.id = text
       let label = document.createElement('label');
       label.htmlFor = text
@@ -111,23 +120,17 @@ ipcRenderer.on('train-load', (e, data)=> {
       checkbox.appendChild(input)
       checkbox.appendChild(label)
       wrapp.appendChild(checkbox)
-      train.appendChild(wrapp)
+      train0.appendChild(wrapp)
    }
-})
 
-ipcRenderer.on('convert-load', (e, data)=> {
-
-   $('#video-photo-loading').hide()
-   let convert = document.getElementById('convert')
-   convert.innerHTML = ''
-
-   for (let text of data) {
+   for (let text of data[1]) {
       let wrapp = document.createElement('div')
+      wrapp.className = 'field'
       let checkbox = document.createElement('div');
-      checkbox.className = 'ui checkbox'
+      checkbox.className = 'ui radio checkbox'
       let input = document.createElement('input');
-      input.type = 'checkbox'
-      input.name = text
+      input.type = 'radio'
+      input.name = 'extract'
       input.id = text
       let label = document.createElement('label');
       label.htmlFor = text
@@ -136,34 +139,11 @@ ipcRenderer.on('convert-load', (e, data)=> {
       checkbox.appendChild(input)
       checkbox.appendChild(label)
       wrapp.appendChild(checkbox)
-      convert.appendChild(wrapp)
+      train1.appendChild(wrapp)
    }
+
 })
 
-ipcRenderer.on('photo-video-load', (e, data)=> {
-
-   $('#video-photo-loading').hide()
-   let photo = document.getElementById('photo-video')
-   photo.innerHTML = ''
-
-   for (let text of data) {
-      let wrapp = document.createElement('div')
-      let checkbox = document.createElement('div');
-      checkbox.className = 'ui checkbox'
-      let input = document.createElement('input');
-      input.type = 'checkbox'
-      input.name = text
-      input.id = text
-      let label = document.createElement('label');
-      label.htmlFor = text
-      label.innerText = text
-
-      checkbox.appendChild(input)
-      checkbox.appendChild(label)
-      wrapp.appendChild(checkbox)
-      photo.appendChild(wrapp)
-   }
-})
 
 
 
@@ -200,18 +180,28 @@ $('#display-train').on('click', () => {
    $('#video-photo-loading').show()
 })
 
-$('#display-convert').on('click', () => {
-   ipcRenderer.send('convert-load')
+$('#train-send').on('click', () => {
 
-   hideAll()
-   $('#convert').show()
    $('#video-photo-loading').show()
-})
+   let train0 = document.getElementById('train-content0')
+      ,train1 = document.getElementById('train-content1')
 
-$('#display-photo-video').on('click', () => {
-   ipcRenderer.send('photo-video-load')
+   let elems0 = train0.getElementsByTagName('input')
+      ,elems1 = train1.getElementsByTagName('input')
+   let check0 = ''
+      ,check1 = ''
 
-   hideAll()
-   $('#photo-video').show()
-   $('#video-photo-loading').show()
+   for(let elem of elems0)
+      if(elem.checked)
+         check0 = elem.id
+
+   for(let elem of elems1)
+      if(elem.checked)
+         check1 = elem.id
+
+   let answ = {check0, check1}
+
+
+   ipcRenderer.send('extract', answ)
+
 })

@@ -6,7 +6,9 @@ const {
 const ffmpeg = require('ffmpeg')
 const ffmpeg_fluent = require('fluent-ffmpeg');
 const command = ffmpeg_fluent();
-const getVideoDurationInSeconds = require('get-video-duration')
+const {
+  getVideoDurationInSeconds
+} = require('get-video-duration')
 const fs = require('fs')
 const path = require('path')
 const fileExtension = require('file-extension')
@@ -124,21 +126,23 @@ const loadRawData = async data => {
   let videos = []
   let images = []
   let files = await readdirAsync(path)
+  files = files.filter((file) => file !== '.DS_Store')
   console.log(files)
   files.forEach((file) => {
     if (isImage(file)) images.push(file)
     if (isVideo(file)) videos.push(file)
   })
   if (images.length !== 0) copyAll(images, path, dir_to_raw_photos + name)
-  if (videos.length !== 0) videos.forEach((video) => convertVideoToImages(path + '/' + video, dir_to_raw_photos + name))
+  if (videos.length !== 0) videos.forEach((video) =>  convertVideoToImages(path + '/' + video, dir_to_raw_photos + name))
+  console.log('Raw data succesfully sorted')
 
 
 }
 
 const addZeroesToMilliseconds = (ms) => {
   _ms = ms
-  if (ms<100) _ms = '0' + _ms
-  if (ms<10) _ms = '0' + _ms
+  if (ms < 100) _ms = '0' + _ms
+  if (ms < 10) _ms = '0' + _ms
   return _ms
 }
 
@@ -156,39 +160,82 @@ const getTimestamps = (time_offset, fps, frames) => {
     minutes = addZeroToTimestamp(Math.floor(time_offset / 60) % 60)
     seconds = addZeroToTimestamp(time_offset - 3600 * hours - minutes * 60)
     milliseconds = addZeroesToMilliseconds((1000 / fps * i) % 1000)
-    timestamp = (hours !== 0) ? `${hours}:${minutes}:${seconds}.${milliseconds}` : `${minutes}:${seconds}.${milliseconds}`
+    timestamp = (hours !== '00') ? `${hours}:${minutes}:${seconds}.${milliseconds}` : `${minutes}:${seconds}.${milliseconds}`
     timestamps.push(timestamp)
     if (i % fps === 0) time_offset++
   }
-  console.log(timestamps)
+  return timestamps
 }
 
-const convertVideoToImages = async (video, dstDir) => {
-
-  const duration = await getVideoDurationInSeconds(video)
-  if (duration === 0 || duration === undefined) throw 'Duration of the video cannot be read!!!'
-  const FPS = 20
-  const frames = duration * FPS
-  const BATCH_SIZE = 100
-  let time_offset = 0
-  let timestamps = []
-  for (let i = 0; i < Math.floor(frames / BATCH_SIZE); i++) {
-    timestamps = getTimestamps(time_offset, FPS, BATCH_SIZE)
-    ffmpeg_fluent(video)
-      .screenshots({
-        timestamps: timestamps,
-        folder: dstDir,
-        filename: `0${i}%i0.png`
+const convertVideoFragmentToImages = (video, timeStamps, dstDir, calls_counter) => {
+  return new Promise((resolve, reject) => {
+    const ffmpeg_video = ffmpeg_fluent(video)
+    ffmpeg_video.on('progress', function (progress) {
+        console.log('Progress:' + progress);
+      })
+      .on('filenames', filenames => {
+        console.log(`${calls_counter} call`)
       })
       .on('end', () => {
-        console.log(`${time_offset*FPS} frames converted`)
+        // console.log(`${time_offset*FPS} frames converted`)
+        console.log(`${calls_counter} call is over`)
+        resolve(`${calls_counter} call is over`)
       })
-    timestamps = []
+      .screenshots({
+        timestamps: timeStamps,
+        folder: dstDir,
+        filename: `${calls_counter}_%00i.png`
+      })
+  })
+}
+
+
+const convertVideoToImages = async (video, dstDir) => {
+  const duration = await getVideoDurationInSeconds(video)
+  const FPS = 20
+  const frames = duration * FPS
+  const BATCH_SIZE = 40
+  let time_offset = 0
+  let timeStamps = []
+  let array = []
+  for (let calls_counter = 0; calls_counter < Math.floor(frames / BATCH_SIZE); calls_counter++) {
+    timeStamps = getTimestamps(time_offset, FPS, BATCH_SIZE)
+    let _value = await convertVideoFragmentToImages(video, timeStamps, dstDir, calls_counter)
+    array.push(_value)
     time_offset += Math.ceil(BATCH_SIZE / FPS)
   }
-  console.log('Video to images converted')
+}
 
-
+const convertVideoToImages_old = async (video, dstDir) => {
+  const duration = await getVideoDurationInSeconds(video)
+  const FPS = 20
+  const frames = duration * FPS
+  const BATCH_SIZE = 40
+  let time_offset = 0
+  let timeStamps = []
+  let calls_counter = 0
+  const ffmpeg_video = ffmpeg_fluent(video)
+  ffmpeg_video.on('progress', function (progress) {
+      console.log('Progress:' + progress);
+    })
+    .on('filenames', filenames => {
+      // console.log(filenames)
+    })
+    .on('end', () => {
+      console.log(`${time_offset*FPS} frames converted`)
+    })
+  // for (let i = 0; i < Math.floor(frames / BATCH_SIZE); i++) {
+  timeStamps = getTimestamps(time_offset, FPS, BATCH_SIZE)
+  ffmpeg_video
+    .screenshots({
+      timestamps: timeStamps,
+      folder: dstDir,
+      filename: `${calls_counter}_%00i.png`
+    })
+  timeStamps = []
+  time_offset += Math.ceil(BATCH_SIZE / FPS)
+  // }
+  // console.log('Video to images converted')
 }
 const readdirAsync = (path) => {
   return new Promise((resolve, reject) => {

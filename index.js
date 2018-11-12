@@ -144,6 +144,33 @@ ipcRenderer.on('train-load', (e, data)=> {
 
 })
 
+ipcRenderer.on('convert-load', (e, data)=> {
+
+   $('#video-photo-loading').hide()
+   let convert = document.getElementById('convert-content')
+   convert.innerHTML = ''
+
+   for (let text of data) {
+      let wrapp = document.createElement('div')
+      wrapp.className = 'field'
+      let checkbox = document.createElement('div');
+      checkbox.className = 'ui radio checkbox'
+      let input = document.createElement('input');
+      input.type = 'radio'
+      input.name = 'extract'
+      input.id = text
+      let label = document.createElement('label');
+      label.htmlFor = text
+      label.innerText = text
+
+      checkbox.appendChild(input)
+      checkbox.appendChild(label)
+      wrapp.appendChild(checkbox)
+      convert.appendChild(wrapp)
+   }
+
+})
+
 
 
 
@@ -202,6 +229,30 @@ $('#train-send').on('click', () => {
    let answ = {check0, check1}
 
 
-   ipcRenderer.send('extract', answ)
+   ipcRenderer.send('train', answ)
+
+})
+
+$('#display-convert').on('click', () => {
+   ipcRenderer.send('convert-load')
+
+   hideAll()
+   $('#convert').show()
+   $('#video-photo-loading').show()
+
+})
+
+$('#convert-send').on('click', () => {
+   $('#video-photo-loading').show()
+   let convert = document.getElementById('convert-content')
+   let elems = convert.getElementsByTagName('input')
+   let check = '';
+
+   for(let elem of elems)
+      if(elem.checked)
+         check = elem.id
+
+   ipcRenderer.send('convert', check)
+
 
 })

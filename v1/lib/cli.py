@@ -58,8 +58,9 @@ class DirectoryProcessor(object):
     
     def get_faces(self, image):
         faces_count = 0
+        print(faces_count)
+        sys.stdout.flush()
         for face in detect_faces(image, self.arguments.detector):
-            sys.stdout.flush()
             if self.filter is not None and not self.filter.check(face):
                 print('Skipping not recognized face!')
                 continue

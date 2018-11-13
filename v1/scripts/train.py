@@ -135,8 +135,8 @@ class TrainingProcessor(object):
             print('Starting. Press "Enter" to stop training and save model')
 
             for epoch in range(0, 1000000):
+                print(str('['))
                 sys.stdout.flush()
-
                 save_iteration = epoch % self.arguments.save_interval == 0
 
                 trainer.train_one_step(epoch, self.show if (save_iteration or self.save_now) else None)

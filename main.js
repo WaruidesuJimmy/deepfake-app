@@ -12,12 +12,17 @@ const {
 const fs = require('fs')
 const path = require('path')
 const fileExtension = require('file-extension')
+const http = require('http')
+const net = require('net')
+const FLASK_ADDR = '0.0.0.0'
+const FLASK_PORT = '5000'
 
 
 const dir_to_raw_videos = __dirname + '/v1/data/raw-videos/',
   dir_to_raw_photos = __dirname + '/v1/data/raw-photo/',
   dir_to_extracted = __dirname + '/v1/data/extracted/',
-  dir_to_models = __dirname + '/v1/models/'
+  dir_to_models = __dirname + '/v1/models/',
+  dir_to_faceswap = __dirname + '/v1/faceswap.py'
 
 
 
@@ -44,11 +49,15 @@ function createWindow() {
   // Открыть средства разработчика.
   win.webContents.openDevTools()
 
+  const pyProg = spawn('python', ['v1/main.py'])
+  // pyProg.stdout.on('data', (data) => console.log(data.toString()))
+
   // Вызывается, когда окно будет закрыто.
   win.on('closed', () => {
     // Разбирает объект окна, обычно вы можете хранить окна     
     // в массиве, если ваше приложение поддерживает несколько окон в это время,
     // тогда вы должны удалить соответствующий элемент.
+    const pyProg = spawn('pkill', ['-f v1/main.py'])
     win = null
   })
 }
@@ -92,24 +101,149 @@ ipcMain.on('train', (e, data) => {
 ipcMain.on('train-load', e => {
   const dirNames = loadDirectoriesNames(dir_to_extracted)
   win.webContents.send('train-load', dirNames)
-  train({person_A: 'sobolev', person_B: 'ikakprosto', trainer: "GAN"})
+  train({
+    person_A: 'cage',
+    person_B: 'trump'
+  })
+})
+
+ipcMain.on('convert-load', e => {
+  const dirNames = loadDirectoriesNames(dir_to_models)
+  win.webContents.send('convert-load', dirNames)
+  const data = {
+    MODEL: 'cage-trump',
+    INPUT_DIR: '/Users/waruidesujimmy/Documents/deepfake-app/v1/data/extracted/cage',
+    FROM_TO: 'cage-trump',
+    OUTPUT_DIR: '/Users/waruidesujimmy/Documents/deepfake-app/v1/data/done-photo/trump'
+  }
+  convert(data)
+})
+
+ipcMain.on('convert', (e, data) => {
+  convert(data)
 })
 
 ipcMain.on('load-raw-data', (e, data) => {
   loadRawData(data)
 })
 
+ipcMain.on('stop', e => {
+  connect('/stop', 'GET')
+})
 
-const train = ({person_A, person_B, trainer, BATCH_SIZE}) => {
-  let arguments = []
+const convert = (data) => {
+  const {
+    MODEL,
+    INPUT_DIR,
+    FROM_TO,
+    OUTPUT_DIR
+  } = data
+  let arguments = ['python', dir_to_faceswap, 'convert']
+  if (MODEL !== FROM_TO) arguments.push('-s')
+  const MODEL_DIR = dir_to_models + MODEL
+  arguments.push('-i', INPUT_DIR, '-o', OUTPUT_DIR, '-m', MODEL_DIR)
+
+  console.log(...arguments)
+  let command = {
+    command: arguments
+  }
+
+  connect('/run', 'POST', onData = (_data) => {console.log(_data.toString())}, onEnd = () => {}, onError = (err) => {}, onClose = () => {}, command)
+
+}
+
+const connect = (path, method = 'GET', onData = (_data) => {}, onEnd = () => {console.log('end')}, onError = (err) => {}, onClose = () => {}, data = {}) => {
+  if (method === 'GET') {
+    let options = {
+      hostname: FLASK_ADDR,
+      port: FLASK_PORT,
+      path: path,
+      method: 'GET',
+    }
+    const req = http.request(options, (response) => {
+      console.log('Status:', response.statusCode)
+      console.log('Headers: ', response.headers)
+      response.pipe(process.stdout)
+      response.on('end', () => onEnd())
+      response.on('close', () => onClose())
+      response.on('data', _data => onData(_data))
+      response.on('error', err => onError(err))
+    })
+    req.end()
+  } else if (method === 'POST') {
+    let options = {
+      hostname: FLASK_ADDR,
+      port: FLASK_PORT,
+      path: path,
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'Content-Length': data.length
+      }
+    }
+    const DATA = JSON.stringify(data)
+    options.headers = {
+      'Content-Type': 'application/json',
+      'Content-Length': DATA.length
+    }
+    const req = http.request(options, (response) => {
+      // console.log('Status:', response.statusCode)
+      // console.log('Headers: ', response.headers)
+      response.pipe(process.stdout)
+      response.on('end', () => onEnd())
+      response.on('close', () => onClose())
+      response.on('data', _data => onData(_data))
+      response.on('error', err => onError(err))
+    })
+    req.write(DATA)
+    req.end()
+  }
+
+}
+
+const train = ({
+  person_A,
+  person_B,
+  trainer,
+  BATCH_SIZE
+}) => {
+  let arguments = ['python', dir_to_faceswap, 'train']
   // arguments.push('-s', 100)
   if (trainer === 'LowMem' || trainer === 'GAN') arguments.push('-t', trainer)
   if (!isNaN(BATCH_SIZE)) arguments.push('-bs', BATCH_SIZE)
   const MODEL_DIR = dir_to_models + `${person_A}-${person_B}`
   const INPUT_A = dir_to_extracted + person_A
+
   const INPUT_B = dir_to_extracted + person_B
-  arguments.push('-A', INPUT_A, '-B', INPUT_B, '-m', MODEL_DIR)
-  console.log(arguments)
+  arguments.push('-A', INPUT_A, '-B', INPUT_B, '-m', MODEL_DIR,  '-s', '5')
+  // console.log('python faceswap.py train', ...arguments)
+
+  let command = {
+    command: arguments
+  }
+
+
+  connect('/run', method = 'POST', onData = (_data) => {
+      console.log(_data.toString())
+    },
+    onEnd = () => {
+      console.log('end')
+    },
+    onError = (err) => {},
+    onClose = () => {}, command)
+
+
+  // const pyProg = spawn('python', arguments)
+
+  // pyProg.stdout.on('data', (data) => {
+  //   console.log(data)
+  // })
+  // .on('end', () => {
+  //   win.webContents.send('on-complete')
+  //   console.log('trained')
+  // })
+  // .on('close', () => console.log('closed'))
+  // .on('error', (err) => console.log(err))
 
 
 }
@@ -156,6 +290,7 @@ const extract = async (data) => {
       win.webContents.send('on-complete')
     })
 }
+
 
 
 const isImage = file => {

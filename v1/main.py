@@ -43,9 +43,10 @@ def video():
     if request.method == 'POST':
         data = request.get_json()
         inputDir = str(data['inputDir'])
-        outputDir = str(data['outputDir']) + '/vidos.mp4'
+        outputDir = str(data['outputDir']) + '/video.mp4'
         fps = 25
         images = [img for img in os.listdir(inputDir) if img.endswith(".png")]
+        images = sorted(images)
         frame = cv2.imread(os.path.join(inputDir, images[0]))
         height, width, layers = frame.shape
 

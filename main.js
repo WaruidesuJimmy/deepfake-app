@@ -85,7 +85,8 @@ app.on('activate', () => {
 })
 
 ipcMain.on('extract-load', (e) => {
-  const dirNames = loadDirectoriesNames(dir_to_raw_videos)
+  let dirNames = loadDirectoriesNames(dir_to_raw_photos)
+  dirNames = dirNames.filter((dir) => fs.lstatSync(dir_to_raw_photos + dir).isDirectory())
   win.webContents.send('extract-load', dirNames)
 })
 
@@ -101,22 +102,11 @@ ipcMain.on('train', (e, data) => {
 ipcMain.on('train-load', e => {
   const dirNames = loadDirectoriesNames(dir_to_extracted)
   win.webContents.send('train-load', dirNames)
-  train({
-    person_A: 'cage',
-    person_B: 'trump'
-  })
 })
 
 ipcMain.on('convert-load', e => {
   const dirNames = loadDirectoriesNames(dir_to_models)
   win.webContents.send('convert-load', dirNames)
-  const data = {
-    MODEL: 'cage-trump',
-    INPUT_DIR: '/Users/waruidesujimmy/Documents/deepfake-app/v1/data/extracted/cage',
-    FROM_TO: 'cage-trump',
-    OUTPUT_DIR: '/Users/waruidesujimmy/Documents/deepfake-app/v1/data/done-photo/trump'
-  }
-  convert(data)
 })
 
 ipcMain.on('convert', (e, data) => {
@@ -148,11 +138,15 @@ const convert = (data) => {
     command: arguments
   }
 
-  connect('/run', 'POST', onData = (_data) => {console.log(_data.toString())}, onEnd = () => {}, onError = (err) => {}, onClose = () => {}, command)
+  connect('/run', 'POST', onData = (_data) => {
+    console.log(_data.toString())
+  }, onEnd = () => {}, onError = (err) => {}, onClose = () => {}, command)
 
 }
 
-const connect = (path, method = 'GET', onData = (_data) => {}, onEnd = () => {console.log('end')}, onError = (err) => {}, onClose = () => {}, data = {}) => {
+const connect = (path, method = 'GET', onData = (_data) => {}, onEnd = () => {
+  console.log('end')
+}, onError = (err) => {}, onClose = () => {}, data = {}) => {
   if (method === 'GET') {
     let options = {
       hostname: FLASK_ADDR,
@@ -215,7 +209,7 @@ const train = ({
   const INPUT_A = dir_to_extracted + person_A
 
   const INPUT_B = dir_to_extracted + person_B
-  arguments.push('-A', INPUT_A, '-B', INPUT_B, '-m', MODEL_DIR,  '-s', '5')
+  arguments.push('-A', INPUT_A, '-B', INPUT_B, '-m', MODEL_DIR, '-s', '5')
   // console.log('python faceswap.py train', ...arguments)
 
   let command = {
@@ -312,21 +306,32 @@ const isVideo = file => {
 }
 
 const loadRawData = async data => {
-  const {
-    path,
+  let {
+    paths,
     name
   } = data
+  let objDir = {
+    paths: []
+  }
+  paths = [...new Set(paths)]
+  paths.forEach((path) => {
+    if (fs.lstatSync(path).isDirectory()){ readDirRecursivly(path, objDir)}
+    if (fs.lstatSync(path).isFile()) objDir.paths.push(path)
+  })
+  paths = [...new Set(objDir.paths)]
   let videos = []
   let images = []
-  let files = await readdirAsync(path)
-  files = files.filter((file) => file !== '.DS_Store')
-  console.log(files)
-  files.forEach((file) => {
+  // folders.forEach((path) => {
+  //   let _files = fs.readdirSync(path)
+  //   _files = _files.filter((file) => file !== '.DS_Store')
+  //   _files.forEach(_file => files.push(path + '/' +  _file))
+  // })
+  paths.forEach((file) => {
     if (isImage(file)) images.push(file)
     if (isVideo(file)) videos.push(file)
   })
-  if (images.length !== 0) copyAll(images, path, dir_to_raw_photos + name)
-  if (videos.length !== 0) videos.forEach((video) => convertVideoToImages(path + '/' + video, dir_to_raw_photos + name))
+  // if (images.length !== 0) copyAll(images, path, dir_to_raw_photos + name)
+  // if (videos.length !== 0) videos.forEach((video) => convertVideoToImages(path + '/' + video, dir_to_raw_photos + name))
 }
 
 const addZeroesToMilliseconds = (ms) => {
@@ -379,6 +384,16 @@ const convertVideoFragmentToImages = (video, timeStamps, dstDir, calls_counter) 
   })
 }
 
+
+const readDirRecursivly = (dir, dirObj) => {
+  let dirs = fs.readdirSync(dir)
+  dirs.forEach((path) => {
+    if(path === '.DS_Store') return
+    _path = dir + '/' + path
+    if (fs.lstatSync(_path).isDirectory()) readDirRecursivly(_path, dirObj)
+    if (fs.lstatSync(_path).isFile()) dirObj.paths.push(_path)
+  })
+}
 
 const convertVideoToImages = async (video, dstDir) => {
   const duration = await getVideoDurationInSeconds(video)

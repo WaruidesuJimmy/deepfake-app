@@ -7,91 +7,243 @@
   <link rel="stylesheet" type="text/css" href="semantic/dist/semantic.min.css">
   <script src="https://code.jquery.com/jquery-3.1.1.min.js" integrity="sha256-hVVnYaiADRTO2PzUGmuLJr8BLUSjGIZsDYGmIJLv2b8="
     crossorigin="anonymous"></script>
-    <script src="https://code.jquery.com/jquery-3.3.1.min.js"></script>
+  <script src="https://code.jquery.com/jquery-3.3.1.min.js"></script>
   <script src="semantic/dist/semantic.min.js"></script>
-  <link type="text/css" rel="stylesheet" href="style.css"/>
+  <link type="text/css" rel="stylesheet" href="style.css" />
 </head>
 
 <body>
 
+  <!-- <div id='progress'>
+    <div class="ui segment">
+      <div class="ui active dimmer">
+        <div class="ui indeterminate text loader">Preparing Files</div>
+      </div>
+      <p></p>
+    </div>
+  </div> -->
+
   <div class="main">
 
-    <div id='menu' >
-      <div class="ui input">
+    <div id='menu'>
+      <!-- <div class="ui input">
         <input type="button" value="video-photo" id="display-video-photo">
         <input type="button" value="extract" id="display-extract">
         <input type="button" value="train" id="display-train">
         <input type="button" value="convert" id="display-convert">
         <input type="button" value="photo-video" id="display-photo-video">
+      </div> -->
+      <div class="ui inverted segment">
+        <div class="ui inverted secondary pointing menu">
+          <a class="item active" value="tutorial" id="display-tutorial">
+            Tutorial
+          </a>
+          <a class="item" value="video-photo" id="display-video-photo">
+            Load data
+          </a>
+          <a class="item" value="extract" id="display-extract">
+            Extract
+          </a>
+          <a class="item" value="train" id="display-train">
+            Train
+          </a>
+          <a class="item" value="convert" id="display-convert">
+            Convert
+          </a>
+          <a class="item" value="photo-video" id="display-photo-video">
+            Convert images to video
+          </a>
+
+        </div>
+
       </div>
     </div>
 
-    <div id='video-photo' >
-        <div class="ui input">
-          <input type="text" placeholder="enter path of directory" id="path-video-photo">
-          <input type="text" placeholder="enter path of directory" id="name-video-photo">
-          <input type="button" value="send" id="send-button-video-photo">
-        </div>
-    </div>
+    <div id='video-photo' class="element">
+      <div class="ui placeholder segment">
+        <div class="ui two column very relaxed stackable grid">
+          <div class="column">
+            <div class="ui form">
+              <div class="field">
+                <label>Name of person (required) </label>
+                <div class="ui left icon input">
+                  <input type="text" placeholder="Name" id="name-video-photo">
+                  <i class="user icon"></i>
+                </div>
+                <div class="ui below pointing red basic label">
+                  Name is required!
+                </div>
+              </div>
+              <div class="ui blue submit button" value="send" id="send-button-video-photo">Sort person's files</div>
+            </div>
+          </div>
+          <div class="column" id='drag'>
+            <h2 class="ui icon header">
+              <i class="copy outline icon"></i>
+              <div class="content">
+                Drop files here
+                <div class="sub header"> Drag and drop files which contains videos and images with person .</div>
+              </div>
+            </h2>
 
-    <div class="ui icon message" id="video-photo-loading">
-      <i class="notched circle loading icon"></i>
-      <div class="content">
-        <div class="header">
-          Just one second
+          </div>
         </div>
-        <p>Data are sorting</p>
+
+        <div class="ui vertical divider">
+          Or
+        </div>
       </div>
-    </div>
+      <div id='dirs'>
+      </div>
 
-    <div class="ui positive message" id="video-photo-success">
-      <i class="close icon"></i>
+      <!-- <div class="ui input">
+        <div href="#" id="drag">
+          <div class="ui segment">
+            <h2 class="ui header"> -->
+      <!-- Drop your files here
+                    <div class="sub header">or directories</div> -->
+      <!-- <i class="icon plus large"></i>
+            </h2>
+          </div>
+        </div>
+        <input type="text" placeholder="enter name" id="name-video-photo"> -->
+      <!-- <input type="button" value="send" id="send-button-video-photo"> -->
+    </div>
+  </div>
+
+  <div class="ui icon message" id="video-photo-loading">
+    <i class="notched circle loading icon"></i>
+    <div class="content">
       <div class="header">
-        Successful
+        Just one second
       </div>
-      <p>Data has been <b>sorted</b></p>
+      <p>Data are sorting</p>
     </div>
+  </div>
+
+  <div class="ui positive message" id="video-photo-success">
+    <i class="close icon"></i>
+    <div class="header">
+      Successful
+    </div>
+    <p>Data has been <b>sorted</b></p>
+  </div>
 
 
-    <div id='extract'>
-      <div id="extract-content">
+  <div id='extract' class="element">
+    <div class="ui placeholder segment">
+      <div class="ui two column very relaxed stackable grid">
+        <div class="column">
+          <div class="ui form">
+            <div class="field">
+              <label>Person to extract</label>
+              <div class="ui left icon input">
+                <select id='extract-names'>
+                </select>
+              </div>
+            </div>
+            <div class="field">
 
+              <label>Extract method</label>
+
+              <div class="ui left icon input">
+                <select id='extract-methods'>
+                  <option value='hog'>hog</option>
+                  <option value='cnn'>cnn</option>
+                </select>
+              </div>
+            </div>
+            <div class="ui blue submit button" value="send" id="extract-send">Extract</div>
+
+          </div>
+        </div>
+        <div class="middle aligned column" id='drop-photo'>
+          <h2 class="ui icon header">
+            <!-- <i class="copy outline icon"></i> -->
+            <div id='drop-photo'>
+              <div class="ui image" id='photo'>
+                <img src="user.png">
+              </div>
+            </div>
+            <div class="content">
+              Person's photo
+              <div class="sub header">Drop person's photo here if source contains another people .</div>
+            </div>
+          </h2>
+        </div>
       </div>
-      <div class="ui input">
-        <input type="button" value="send" id="extract-send">
+      <div class="ui vertical divider">
+        Or
       </div>
     </div>
-    <div id='train'>
-        <div id="train-content0">
+  </div>
+  <div id='train' class="element">
+      <div class="ui placeholder segment">
+          <div class="ui column very relaxed stackable grid">
+            <div class="column">
+              <div class="ui form">
+                <div class="field">
+                  <label>Person A</label>
+                  <div class="ui left icon input">
+                    <select id='personA'>
+                    </select>
+                  </div>
+                </div>
+                <div class="field">
+                    <label>Person B</label>
+                    <div class="ui left icon input">
+                      <select id='personB'>
+                      </select>
+                    </div>
+                  </div>
+                <div class="field">
+    
+                  <label>Extract method</label>
+    
+                  <div class="ui left icon input">
+                    <select id='train-methods'>
+                      <option value='Original'>Original</option>
+                      <option value='LowMem'>LowMemory</option>
+                      <option value='GAN'>GAN</option>
+                    </select>
+                  </div>
+                </div>
+                <div class="ui blue submit button" value="send" id="extract-send">Extract</div>
+    
+              </div>
+            </div>
+          </div>
+        </div>
+    <div id="train-content0">
 
-        </div>
-        <div id="train-content1">
-
-        </div>
-        <div class="ui input">
-            <input type="button" value="send" id="train-send">
-        </div>
     </div>
-    <div id='convert'>
-        <div id="convert-content">
-
-        </div>
-        <div class="ui input">
-            <input type="button" value="send" id="convert-send">
-        </div>
-    </div>
-    <div id='photo-video'>
+    <div id="train-content1">
 
     </div>
-
-    <div class="ui negative message" id="err">
-      <i class="close icon"></i>
-      <div class="header">
-        Error
-      </div>
-      <p>Smth wrong :/
-      </p>
+    <div class="ui input">
+      <input type="button" value="send" id="train-send">
     </div>
+  </div>
+  <div id='convert' class="element">
+    <div id="convert-content">
+
+    </div>
+    <div class="ui input">
+      <input type="button" value="send" id="convert-send">
+    </div>
+  </div>
+  <div id='photo-video' class="element">
+
+  </div>
+
+  <div class="ui negative message" id="err">
+    <i class="close icon"></i>
+    <div class="header">
+      Error
+    </div>
+    <p>Smth wrong :/
+    </p>
+  </div>
 
 
   <!--<div class="ui message" id='console-output'>

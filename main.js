@@ -111,17 +111,17 @@ ipcMain.on('train', (e, data) => {
 })
 
 ipcMain.on('video-photo', (e, data) => {
-  try{
-  const {
-    VIDEO, 
-    OUTPUT_DIR
-  } = data
-  videos_toconvert = 1
-  images_converted = 0
-  videos_converted =0 
-  images_toconvert= 0
-  convertVideoToImages(VIDEO, OUTPUT_DIR)}
-  catch(e){
+  try {
+    const {
+      VIDEO,
+      OUTPUT_DIR
+    } = data
+    videos_toconvert = 1
+    images_converted = 0
+    videos_converted = 0
+    images_toconvert = 0
+    convertVideoToImages(VIDEO, OUTPUT_DIR)
+  } catch (e) {
     win.webContents.send('error')
   }
 })
@@ -160,39 +160,80 @@ const succesLoadRawData = () => {
 
 
 const images_to_video = (data) => {
-  let videoOptions = {
-    fps: 25,
-    loop: 5, // seconds
-    transition: true,
-    transitionDuration: 1, // seconds
-    videoBitrate: 1024,
-    videoCodec: 'libx264',
-    size: '640x?',
-    audioBitrate: '128k',
-    audioChannels: 2,
-    format: 'mp4',
-    pixelFormat: 'yuv420p'
-  }
-  let files = readdirSync(data.inputDir)
-  let images = []
-  files.map((image) => data.inputDir + '/' + image)
+  // let videoOptions = {
+  //   fps: 30,
+  //   loop: 5, // seconds
+  //   transition: true,
+  //   transitionDuration: 1, // seconds
+  //   videoBitrate: 1024,
+  //   size: '640x?',
+  //   audioBitrate: '128k',
+  //   audioChannels: 2,
+  //   format: 'mp4',
+  //   pixelFormat: 'yuv420p'
+  // }
+  // // console.log(data)
+  // let files = fs.readdirSync(data.inputDir)
+  // let images = []
+  // files.forEach((image, index) => files[index] = data.inputDir + '/' + image)
 
-  files.forEach((file) => {
-    if (isImage(file)) images.push(file)
-  })
+  // files.forEach((file) => {
+  //   if (isImage(file)) images.push(file)
+  // })
+  // videoshow(images)
+  // .save(data.outputDir + '/qwert.mp4')
+  // .on('error', function (err,stdout, stderr) {console.log(err, stdout, stderr)})
+  // .on('end', function () {console.log('converted')})
+  // console.log(ffmpeg_fluent().getAvailableCodecs((err, codecs) => console.dir(codecs)))
+  // videoshow(images, videoOptions)
+  //   .save(data.outputDir + '/' + 'video.mp4')
+  //   .on('start', function (command) {
+  //     console.log('ffmpeg process started:', command)
+  //   })
+  //   .on('error', function (err, stdout, stderr) {
+  //     console.error('Error:', err)
+  //     console.error('ffmpeg stderr:', stderr)
+  //   })
+  //   .on('end', function (output) {
+  //     console.error('Video created in:', output)
+  //   })
+  //   .on('progress', (_data) => console.log(_data))
+  // console.log(data)
+  // let ffmpeg_stream = ffmpeg_fluent()
+  // ffmpeg_stream.on('start', function(commandLine) {
+  //   console.log('Spawned Ffmpeg with command: ' + commandLine);
+  //   })
+  //   .on('error', function(err) {
+  //   console.log('An error occurred: ' + err.message);
+  //   })
+  //   .on('end', function() {
+  //   console.log('Processing finished !');
+  //   })
+  //   .outputFPS(25)
+  // images.forEach((image) => {
+  //   ffmpeg_stream.input(image)
+  // })
 
-  videoshow(images, videoOptions)
-    .save(data.outputDir + '/' + 'video.mp4')
-    .on('start', function (command) {
-      console.log('ffmpeg process started:', command)
-    })
-    .on('error', function (err, stdout, stderr) {
-      console.error('Error:', err)
-      console.error('ffmpeg stderr:', stderr)
-    })
-    .on('end', function (output) {
-      console.error('Video created in:', output)
-    })
+  // ffmpeg_stream.output(data.outputDir + '/video.mp4')
+  // ffmpeg_stream.run()
+  // let command = {command: ['ffmpeg']}
+  // // command.command.push(data.outputDir + '/vid.mp4')
+  // // ffmpeg_stream.save(data.outputDir + '/video.mp4')
+  // command.command.push( '-c:v libx264 -vf \"fps=25,format=yuv420p\"')
+  // images.forEach(image => command.command.push('-i', image))
+  // // command.command.push('-i', data.inputDir + '/pic%08d.png')
+  // command.command.push( data.outputDir + '/vid.mp4')
+  // connect('/run', 'POST', onData = (_data) => {
+  //   console.log(_data.toString())
+  // }, onEnd = () => {}, onError = (err) => {}, onClose = () => {
+  //   console.log('converted')
+  // }, command)
+  connect('/video', 'POST', onData = (_data) => {
+    console.log(_data.toString())
+  }, onEnd = () => {}, onError = (err) => {}, onClose = () => {
+    console.log('converted')
+  }, {inputDir:data.inputDir, outputDir: data.outputDir})
+
 }
 
 const convert = (data) => {
@@ -217,11 +258,17 @@ const convert = (data) => {
   INPUT_DIR.forEach((dir => {
     let args = arguments
     args.push('-i', dir)
-    command = {command:args}
+    command = {
+      command: args
+    }
     win.webContents.send('progress')
     connect('/run', 'POST', onData = (_data) => {
       console.log(_data.toString())
-    }, onEnd = () => {}, onError = (err) => {}, onClose = () => {converted++; convertCheck() ;console.log('converted') }, command)
+    }, onEnd = () => {}, onError = (err) => {}, onClose = () => {
+      converted++;
+      convertCheck();
+      console.log('converted')
+    }, command)
     args = []
     command = {}
   }))
@@ -405,9 +452,9 @@ const isVideo = file => {
 const loadRawData = async data => {
   try {
     videos_toconvert = 0
-  images_converted = 0
-  videos_converted =0 
-  images_toconvert= 0
+    images_converted = 0
+    videos_converted = 0
+    images_toconvert = 0
     let {
       _paths,
       name
@@ -484,6 +531,12 @@ const getTimestamps = (time_offset, fps, frames) => {
 const convertVideoFragmentToImages = (video, timeStamps, dstDir, calls_counter) => {
   return new Promise((resolve, reject) => {
     const ffmpeg_video = ffmpeg_fluent(video)
+    let index = calls_counter.toString()
+    let length = index.length
+    for (let i =0;  i < 6-length; i++){
+      index = '0' + index
+    }
+    console.log(timeStamps)
     ffmpeg_video.on('progress', function (progress) {
         console.log('Progress:' + progress);
       })
@@ -498,7 +551,7 @@ const convertVideoFragmentToImages = (video, timeStamps, dstDir, calls_counter) 
       .screenshots({
         timestamps: timeStamps,
         folder: dstDir,
-        filename: `${calls_counter}_%00i.png`
+        filename: `pic${index}%0i.png`
       })
   })
 }
@@ -516,9 +569,9 @@ const readDirRecursivly = (dir, dirObj) => {
 
 const convertVideoToImages = async (video, dstDir) => {
   const duration = await getVideoDurationInSeconds(video)
-  const FPS = 20
+  const FPS = 25
   const frames = duration * FPS
-  const BATCH_SIZE = 40
+  const BATCH_SIZE = 99
   let time_offset = 0
   let timeStamps = []
   let array = []

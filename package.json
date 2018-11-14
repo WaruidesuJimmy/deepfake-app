@@ -7,6 +7,7 @@
   },
   "dependencies": {
     "ffmpeg": "0.0.4",
+    "ffmpeg-stream": "^0.5.0",
     "file-extension": "^4.0.5",
     "fluent-ffmpeg": "^2.1.2",
     "get-video-duration": "^1.0.2",

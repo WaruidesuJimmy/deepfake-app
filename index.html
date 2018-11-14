@@ -59,6 +59,45 @@
       </div>
     </div>
 
+    <!-- <div id='tutorial' class="element">
+        <div class="ui placeholder segment">
+          <div class="ui two column very relaxed stackable grid">
+            <div class="column">
+              <div class="ui form">
+                <div class="field">
+                  <label>Name of person (required) </label>
+                  <div class="ui left icon input">
+                    <input type="text" placeholder="Name" id="name-video-photo">
+                    <i class="user icon"></i>
+                  </div>
+                  <div class="ui below pointing red basic label">
+                    Name is required!
+                  </div>
+                </div>
+                <div class="ui blue submit button" value="send" id="send-button-video-photo">Sort person's files</div>
+              </div>
+            </div>
+            <div class="column" id='drag'>
+              <h2 class="ui icon header">
+                <i class="copy outline icon"></i>
+                <div class="content">
+                  Drop files here
+                  <div class="sub header"> Drag and drop files which contains videos and images with person .</div>
+                </div>
+              </h2>
+  
+            </div>
+          </div>
+  
+          <div class="ui vertical divider">
+            Or
+          </div>
+        </div>
+        <div id='dirs'>
+        </div>
+      </div> -->
+    </div>
+
     <div id='video-photo' class="element">
       <div class="ui placeholder segment">
         <div class="ui two column very relaxed stackable grid">
@@ -95,19 +134,6 @@
       </div>
       <div id='dirs'>
       </div>
-
-      <!-- <div class="ui input">
-        <div href="#" id="drag">
-          <div class="ui segment">
-            <h2 class="ui header"> -->
-      <!-- Drop your files here
-                    <div class="sub header">or directories</div> -->
-      <!-- <i class="icon plus large"></i>
-            </h2>
-          </div>
-        </div>
-        <input type="text" placeholder="enter name" id="name-video-photo"> -->
-      <!-- <input type="button" value="send" id="send-button-video-photo"> -->
     </div>
   </div>
 
@@ -178,62 +204,194 @@
     </div>
   </div>
   <div id='train' class="element">
-      <div class="ui placeholder segment">
-          <div class="ui column very relaxed stackable grid">
-            <div class="column">
-              <div class="ui form">
-                <div class="field">
-                  <label>Person A</label>
-                  <div class="ui left icon input">
-                    <select id='personA'>
-                    </select>
-                  </div>
-                </div>
-                <div class="field">
-                    <label>Person B</label>
-                    <div class="ui left icon input">
-                      <select id='personB'>
-                      </select>
-                    </div>
-                  </div>
-                <div class="field">
-    
-                  <label>Extract method</label>
-    
-                  <div class="ui left icon input">
-                    <select id='train-methods'>
-                      <option value='Original'>Original</option>
-                      <option value='LowMem'>LowMemory</option>
-                      <option value='GAN'>GAN</option>
-                    </select>
-                  </div>
-                </div>
-                <div class="ui blue submit button" value="send" id="extract-send">Extract</div>
-    
+    <div class="ui placeholder segment">
+      <div class="ui column very relaxed stackable grid">
+        <div class="column">
+          <div class="ui form">
+            <div class="field">
+              <label>Person A</label>
+              <div class="ui left icon input">
+                <select id='personA'>
+                </select>
               </div>
             </div>
+            <div class="field">
+              <label>Person B</label>
+              <div class="ui left icon input">
+                <select id='personB'>
+                </select>
+              </div>
+            </div>
+
+            <div class="field">
+              <label>Batch size</label>
+              <div class="ui left icon input">
+                <select id='bs'>
+                  <option value=2>2</option>
+                  <option value=4>4</option>
+                  <option value=8>8</option>
+                  <option value=16>16</option>
+                  <option value=32>32</option>
+                  <option value=64>64</option>
+                  <option value=128>128</option>
+                  <option value=256>256</option>
+                  <option value=512>512</option>
+                  <option value=1024>1024</option>
+                </select>
+              </div>
+            </div>
+            <div class="field">
+
+              <label>Train method</label>
+
+              <div class="ui left icon input">
+                <select id='train-methods'>
+                  <option value='Original'>Original</option>
+                  <option value='LowMem'>LowMemory</option>
+                  <option value='GAN'>GAN</option>
+                </select>
+              </div>
+            </div>
+            <div class="ui blue submit button" value="send" id="train-send">Train</div>
+
           </div>
         </div>
-    <div id="train-content0">
-
-    </div>
-    <div id="train-content1">
-
-    </div>
-    <div class="ui input">
-      <input type="button" value="send" id="train-send">
+      </div>
     </div>
   </div>
   <div id='convert' class="element">
-    <div id="convert-content">
+    <div class="ui placeholder segment">
+      <div class="ui column very relaxed stackable grid">
+        <div class="column">
+          <div class="ui form">
+            <div class="field">
+              <label>Models</label>
+              <div class="ui left icon input">
+                <select id='models'>
+                </select>
+              </div>
+            </div>
+            <div class="field">
+              <label>from to</label>
+              <div class="ui left icon input">
+                <select id='FROMTO'>
+                </select>
+              </div>
+            </div>
+
+            <div class="field">
+
+              <label>Convert method</label>
+
+              <div class="ui left icon input">
+                <select id='convert-methods'>
+                  <option value='Original'>Original</option>
+                  <option value='LowMem'>LowMemory</option>
+                  <option value='GAN'>GAN</option>
+                </select>
+              </div>
+            </div>
+            <div class="field">
+              <label>Detector</label>
+              <div class="ui left icon input">
+                <select id='convert-detector'>
+                  <option value='hog'>hog</option>
+                  <option value='cnn'>cnn</option>
+                </select>
+              </div>
+            </div>
+            <div class="field">
+              <label>Output directory</label>
+              <div class="ui left icon input">
+                <input type="text" placeholder="output directory" id="convert-output-directory">
+                <i class="folder outline icon"></i>
+              </div>
+              <div class="ui below pointing red basic label">
+                Name is required!
+              </div>
+            </div>
+
+            <div class="ui blue submit button" value="send" id="convert-send">Convert</div>
+
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="ui placeholder segment">
+      <div class="ui two column very relaxed stackable grid">
+
+
+        <div class="column" id='drag-convert'>
+          <h2 class="ui icon header">
+            <i class="copy outline icon"></i>
+            <div class="content">
+              Drop files here
+              <div class="sub header"> Drag and drop files which contains videos and images with person .</div>
+            </div>
+          </h2>
+
+        </div>
+
+        <div class="middle aligned column" id='drop-photo-convert'>
+          <h2 class="ui icon header">
+            <!-- <i class="copy outline icon"></i> -->
+            <div id='drop-photo-convert'>
+              <div class="ui image" id='photo-convert'>
+                <img src="user.png">
+              </div>
+            </div>
+            <div class="content">
+              Person's photo
+              <div class="sub header">Drop person's photo here if source contains another people .</div>
+            </div>
+          </h2>
+        </div>
+      </div>
+
+      <div class="ui vertical divider">
+        Or
+      </div>
 
     </div>
-    <div class="ui input">
-      <input type="button" value="send" id="convert-send">
+    <div id='dirs-convert'>
     </div>
   </div>
   <div id='photo-video' class="element">
+    <div class="ui placeholder segment">
+      <div class="ui two column very relaxed stackable grid">
+        <div class="column">
+          <div class="ui form">
+            <div class="field">
+              <label>Output directory </label>
+              <div class="ui left icon input">
+                <input type="text" placeholder="directory" id="directory-photo-video">
+                <i class="user icon"></i>
+              </div>
+              <div class="ui below pointing red basic label">
+                Directory is required!
+              </div>
+            </div>
+            <div class="ui blue submit button" value="send" id="send-button-phot-video">Convert images to video</div>
+          </div>
+        </div>
+        <div class="column" id='drag-photo-video'>
+          <h2 class="ui icon header">
+            <i class="copy outline icon"></i>
+            <div class="content">
+              Drop files here
+              <div class="sub header"> Drag and drop files which contains videos and images with person .</div>
+            </div>
+          </h2>
 
+        </div>
+      </div>
+
+      <div class="ui vertical divider">
+        Or
+      </div>
+    </div>
+    <div id='dirs-photo-video'>
+    </div>
   </div>
 
   <div class="ui negative message" id="err">

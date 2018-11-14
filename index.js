@@ -4,8 +4,10 @@ const {
 } = electron
 const $ = require("jquery");
 let paths = new Set()
-let PATHS = []
 let photo_path = ''
+let photo_path_convert = ''
+let paths_convert = new Set()
+let photo_to_video = ''
 //const log_div = document.getElementById('console-output').getElementsByTagName('p')[0]
 
 ipcRenderer.on('log', (e, data) => {
@@ -39,18 +41,28 @@ ipcRenderer.on('success', (e, data) => {
 
 hideAll()
 
+
 function hideAll() {
    $('#video-photo').hide()
    $('#extract').hide()
    $('#train').hide()
    $('#convert').hide()
    $('#photo-video').hide()
+   $('#tutorial').hide()
+   $('#display-tutorial').removeClass('active')
+   $('#display-video-photo').removeClass('active')
+   $('#display-extract').removeClass('active')
+   $('#display-train').removeClass('active')
+   $('#display-convert').removeClass('active')
+   $('#display-photo-video').removeClass('active')
 }
 
-
+$('#tutorial').show()
+   $('#display-tutorial').addClass('active')
 
 $('#display-video-photo').on('click', () => {
    hideAll()
+   $('#display-video-photo').addClass('active')
    $('#video-photo').show()
    // for (let path of paths) {
    //    $('#dirs').append(`<a class="ui label">
@@ -64,22 +76,16 @@ $('#display-video-photo').on('click', () => {
 
 
 $('#send-button-video-photo').on('click', () => {
-   let path = $('#path-video-photo').val();
    let name = $('#name-video-photo').val();
-   let data = {
-      paths,
-      name
-   }
-   console.log(name)
    if (name === "") {
       $('.field').addClass('error')
       $('.ui.below.pointing.red.basic.label').css({
          display: 'block'
       })
    }
-   console.log(data);
+   console.log({paths, name});
    $('#video-photo-loading').show();
-   ipcRenderer.send('load-raw-data', data)
+   ipcRenderer.send('load-raw-data', {paths: paths, name})
 })
 
 $('#video-photo-loading').hide()
@@ -125,87 +131,130 @@ ipcRenderer.on('extract-load', (e, data) => {
 
 ipcRenderer.on('train-load', (e, data) => {
 
+
+
+
    $('#video-photo-loading').hide()
-   let train0 = document.getElementById('train-content0')
-   let train1 = document.getElementById('train-content1')
-   train0.innerHTML = ''
-   train1.innerHTML = ''
+   let A = document.getElementById('personA')
+   let B = document.getElementById('personB')
+   A.innerHTML = ''
+   B.innerHTML = ''
 
-   for (let text of data[0]) {
-      let wrapp = document.createElement('div')
-      wrapp.className = 'field'
-      let checkbox = document.createElement('div');
-      checkbox.className = 'ui radio checkbox'
-      let input = document.createElement('input');
-      input.type = 'radio'
-      input.name = 'extract'
-      input.id = text
-      let label = document.createElement('label');
-      label.htmlFor = text
-      label.innerText = text
+   for (let text of data) {
 
-      checkbox.appendChild(input)
-      checkbox.appendChild(label)
-      wrapp.appendChild(checkbox)
-      train0.appendChild(wrapp)
+      $('#personA').append(
+         `
+         <option value="${text}">${text}</option>
+         `
+      )
+      $('#personB').append(
+         `
+         <option value="${text}">${text}</option>
+         `
+      )
+      // let wrapp = document.createElement('div')
+      // wrapp.className = 'field'
+      // let checkbox = document.createElement('div');
+      // checkbox.className = 'ui radio checkbox'
+      // let input = document.createElement('input');
+      // input.type = 'radio'
+      // input.name = 'extract'
+      // input.id = text
+      // let label = document.createElement('label');
+      // label.htmlFor = text
+      // label.innerText = text
+
+      // checkbox.appendChild(input)
+      // checkbox.appendChild(label)
+      // wrapp.appendChild(checkbox)
+      // train0.appendChild(wrapp)
    }
 
-   for (let text of data[1]) {
-      let wrapp = document.createElement('div')
-      wrapp.className = 'field'
-      let checkbox = document.createElement('div');
-      checkbox.className = 'ui radio checkbox'
-      let input = document.createElement('input');
-      input.type = 'radio'
-      input.name = 'extract'
-      input.id = text
-      let label = document.createElement('label');
-      label.htmlFor = text
-      label.innerText = text
+   // for (let text of data[1]) {
+   //    let wrapp = document.createElement('div')
+   //    wrapp.className = 'field'
+   //    let checkbox = document.createElement('div');
+   //    checkbox.className = 'ui radio checkbox'
+   //    let input = document.createElement('input');
+   //    input.type = 'radio'
+   //    input.name = 'extract'
+   //    input.id = text
+   //    let label = document.createElement('label');
+   //    label.htmlFor = text
+   //    label.innerText = text
 
-      checkbox.appendChild(input)
-      checkbox.appendChild(label)
-      wrapp.appendChild(checkbox)
-      train1.appendChild(wrapp)
-   }
+   //    checkbox.appendChild(input)
+   //    checkbox.appendChild(label)
+   //    wrapp.appendChild(checkbox)
+   //    train1.appendChild(wrapp)
+   // }
 
 })
 
 ipcRenderer.on('convert-load', (e, data) => {
 
    $('#video-photo-loading').hide()
-   let convert = document.getElementById('convert-content')
-   convert.innerHTML = ''
+   let models = document.getElementById('models')
+   models.innerHTML = ''
 
    for (let text of data) {
-      let wrapp = document.createElement('div')
-      wrapp.className = 'field'
-      let checkbox = document.createElement('div');
-      checkbox.className = 'ui radio checkbox'
-      let input = document.createElement('input');
-      input.type = 'radio'
-      input.name = 'extract'
-      input.id = text
-      let label = document.createElement('label');
-      label.htmlFor = text
-      label.innerText = text
+      let A = text.substring(0, text.indexOf('-'))
+      let B = text.substring(text.indexOf('-')+1)
+      let swap = B + '-' + A
+      $('#models').append(
+         `
+         <option value="${text}">${text}</option>
+         `
+      )
+      $('#FROMTO').append(
+         `
+         <option value="${text}">${text}</option>
+         `
+      )
+      $('#FROMTO').append(
+         `
+         <option value="${swap}">${swap}</option>
+         `
+      )
+      // let wrapp = document.createElement('div')
+      // wrapp.className = 'field'
+      // let checkbox = document.createElement('div');
+      // checkbox.className = 'ui radio checkbox'
+      // let input = document.createElement('input');
+      // input.type = 'radio'
+      // input.name = 'extract'
+      // input.id = text
+      // let label = document.createElement('label');
+      // label.htmlFor = text
+      // label.innerText = text
 
-      checkbox.appendChild(input)
-      checkbox.appendChild(label)
-      wrapp.appendChild(checkbox)
-      convert.appendChild(wrapp)
+      // checkbox.appendChild(input)
+      // checkbox.appendChild(label)
+      // wrapp.appendChild(checkbox)
+      // convert.appendChild(wrapp)
    }
 
 })
 
 
 
+$('#display-tutorial').on('click', () => {
+   hideAll()
+   $('#display-tutorial').addClass('active')
+   $('#tutorial').show()
+})
 
+$('#display-photo-video').on('click', () => {
+   hideAll()
+   $('#display-photo-video').addClass('active')
+   $('#photo-video').show()
+})
 
 $('#display-extract').on('click', () => {
    ipcRenderer.send('extract-load')
 
    hideAll()
+   $('#display-extract').addClass('active')
    $('#extract').show()
    $('#video-photo-loading').show()
 
@@ -232,6 +281,7 @@ $('#display-train').on('click', () => {
    ipcRenderer.send('train-load')
 
    hideAll()
+   $('#display-train').addClass('active')
    $('#train').show()
    $('#video-photo-loading').show()
 })
@@ -265,10 +315,17 @@ $('#train-send').on('click', () => {
 
 })
 
+$('#send-button-phot-video').on('click', (e => {
+   let dir = $('#directory-photo-video').val()
+   let inputDir = photo_to_video
+   ipcRenderer.send('convert-photo-video',{outputDir: dir, inputDir: inputDir})
+}))
+
 $('#display-convert').on('click', () => {
    ipcRenderer.send('convert-load')
 
    hideAll()
+   $('#display-convert').addClass('active')
    $('#convert').show()
    $('#video-photo-loading').show()
 
@@ -314,12 +371,40 @@ holder.ondrop = (e) => {
    for (let f of e.dataTransfer.files) {
       if (paths.has(f.path)) continue
       paths.add(f.path)
+      console.log(paths)
       $('#dirs').append(`<a class="ui label">${f.path}<i class="delete icon" onclick="delete_icon(this)"><div vlaue = '!${f.path}!'></div></i></a>`)
 
    }
 
    return false;
 }
+
+
+let darg_photo_video = document.getElementById('drag-photo-video');
+
+darg_photo_video.ondragover = () => {
+   return false;
+};
+
+darg_photo_video.ondragleave = () => {
+   return false;
+};
+
+darg_photo_video.ondragend = () => {
+   return false;
+};
+darg_photo_video.ondrop = (e) => {
+   e.preventDefault();
+   for (let f of e.dataTransfer.files) {
+      console.log(f.path)
+      photo_to_video = f.path
+      $('#dirs-photo-video').html(`<a class="ui label">${f.path}<i class="delete icon" onclick="delete_photo_video(this)"><div vlaue = '!${f.path}!'></div></i></a>`)
+
+   }
+
+   return false;
+}
+
 
 
 let drop_photo = document.getElementById('drop-photo');
@@ -358,4 +443,77 @@ function delete_icon(elm) {
    inner = inner.substring(inner.indexOf('!')+1, inner.lastIndexOf('!'))
    $(elm).parent().remove()
    paths.delete(inner)
+}
+
+function delete_icon_convert(elm) {
+   let inner = $(elm).html()
+   inner = inner.substring(inner.indexOf('!')+1, inner.lastIndexOf('!'))
+   $(elm).parent().remove()
+   paths_convert.delete(inner)
+}
+
+function delete_photo_video(elm) {
+   let inner = $(elm).html()
+   inner = inner.substring(inner.indexOf('!')+1, inner.lastIndexOf('!'))
+   $(elm).parent().remove()
+   photo_to_video.delete(inner)
+}
+
+
+let convert = document.getElementById('drag-convert');
+
+convert.ondragover = () => {
+   return false;
+};
+
+convert.ondragleave = () => {
+   return false;
+};
+
+convert.ondragend = () => {
+   return false;
+};
+
+convert.ondrop = (e) => {
+   e.preventDefault();
+   for (let f of e.dataTransfer.files) {
+      if (paths_convert.has(f.path)) continue
+      paths_convert.add(f.path)
+      $('#dirs-convert').append(`<a class="ui label">${f.path}<i class="delete icon" onclick="delete_icon_convert(this)"><div vlaue = '!${f.path}!'></div></i></a>`)
+
+   }
+
+   return false;
+}
+
+
+let drop_photo_convert = document.getElementById('drop-photo-convert');
+
+drop_photo_convert.ondragover = () => {
+   return false;
+};
+
+drop_photo_convert.ondragleave = () => {
+   return false;
+};
+
+drop_photo_convert.ondragend = () => {
+   return false;
+};
+
+drop_photo_convert.ondrop = (e) => {
+   e.preventDefault();
+
+   for (let f of e.dataTransfer.files) {
+      $('#photo-convert').html(
+         `
+         <img src= ${f.path}>
+         `
+      )
+      photo_path = f.path
+
+   }
+
+
+   return false;
 }

@@ -1,5 +1,6 @@
 const electron = require('electron')
 const cmd = require('node-cmd')
+const videoshow = require('videoshow')
 const {
   spawn
 } = require('child_process')
@@ -57,6 +58,7 @@ function createWindow() {
     // Разбирает объект окна, обычно вы можете хранить окна     
     // в массиве, если ваше приложение поддерживает несколько окон в это время,
     // тогда вы должны удалить соответствующий элемент.
+    connect('/kill')
     const pyProg = spawn('pkill', ['-f v1/main.py'])
     win = null
   })
@@ -90,7 +92,6 @@ ipcMain.on('extract-load', (e) => {
   win.webContents.send('extract-load', dirNames)
 })
 
-
 ipcMain.on('extract', (e, data) => {
   extract(data)
 })
@@ -114,12 +115,52 @@ ipcMain.on('convert', (e, data) => {
 })
 
 ipcMain.on('load-raw-data', (e, data) => {
+  console.log(data)
   loadRawData(data)
 })
 
 ipcMain.on('stop', e => {
   connect('/stop', 'GET')
 })
+
+ipcMain.on('convert-photo-video', (e, data) => {
+  images_to_video(data)
+})
+
+
+const images_to_video = (data) => {
+  let videoOptions = {
+    fps: 25,
+    loop: 5, // seconds
+    transition: true,
+    transitionDuration: 1, // seconds
+    videoBitrate: 1024,
+    videoCodec: 'libx264',
+    size: '640x?',
+    audioBitrate: '128k',
+    audioChannels: 2,
+    format: 'mp4',
+    pixelFormat: 'yuv420p'
+  }
+  let files = readdirSync(data.inputDir)
+  let images =[]
+  files.map((image) => data.inputDir + '/' + image)
+
+  files.forEach((file) => {if(isImage(file)) images.push(file)} )
+  
+  videoshow(images, videoOptions)
+  .save(data.outputDir + '/' + 'video.mp4')
+  .on('start', function (command) {
+    console.log('ffmpeg process started:', command)
+  })
+  .on('error', function (err, stdout, stderr) {
+    console.error('Error:', err)
+    console.error('ffmpeg stderr:', stderr)
+  })
+  .on('end', function (output) {
+    console.error('Video created in:', output)
+  })
+}
 
 const convert = (data) => {
   const {
@@ -313,7 +354,7 @@ const loadRawData = async data => {
   let objDir = {
     paths: []
   }
-  paths = [...new Set(paths)]
+  console.log(data)
   paths.forEach((path) => {
     if (fs.lstatSync(path).isDirectory()){ readDirRecursivly(path, objDir)}
     if (fs.lstatSync(path).isFile()) objDir.paths.push(path)
@@ -330,6 +371,7 @@ const loadRawData = async data => {
     if (isImage(file)) images.push(file)
     if (isVideo(file)) videos.push(file)
   })
+  console.log(paths)
   // if (images.length !== 0) copyAll(images, path, dir_to_raw_photos + name)
   // if (videos.length !== 0) videos.forEach((video) => convertVideoToImages(path + '/' + video, dir_to_raw_photos + name))
 }

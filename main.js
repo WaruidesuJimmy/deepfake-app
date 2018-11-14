@@ -18,6 +18,15 @@ const net = require('net')
 const FLASK_ADDR = '0.0.0.0'
 const FLASK_PORT = '5000'
 
+let images_converted = 0
+let images_toconvert = 0
+let videos_converted = 0
+let videos_toconvert = 0
+
+let to_convert = 0
+let converted = 0
+
+
 
 const dir_to_raw_videos = __dirname + '/v1/data/raw-videos/',
   dir_to_raw_photos = __dirname + '/v1/data/raw-photo/',
@@ -86,6 +95,7 @@ app.on('activate', () => {
   }
 })
 
+
 ipcMain.on('extract-load', (e) => {
   let dirNames = loadDirectoriesNames(dir_to_raw_photos)
   dirNames = dirNames.filter((dir) => fs.lstatSync(dir_to_raw_photos + dir).isDirectory())
@@ -98,6 +108,22 @@ ipcMain.on('extract', (e, data) => {
 
 ipcMain.on('train', (e, data) => {
   train(data)
+})
+
+ipcMain.on('video-photo', (e, data) => {
+  try{
+  const {
+    VIDEO, 
+    OUTPUT_DIR
+  } = data
+  videos_toconvert = 1
+  images_converted = 0
+  videos_converted =0 
+  images_toconvert= 0
+  convertVideoToImages(VIDEO, OUTPUT_DIR)}
+  catch(e){
+    win.webContents.send('error')
+  }
 })
 
 ipcMain.on('train-load', e => {
@@ -128,6 +154,11 @@ ipcMain.on('convert-photo-video', (e, data) => {
 })
 
 
+const succesLoadRawData = () => {
+  if (images_converted === images_toconvert && videos_converted === videos_toconvert) win.webContents.send('success')
+}
+
+
 const images_to_video = (data) => {
   let videoOptions = {
     fps: 25,
@@ -143,23 +174,25 @@ const images_to_video = (data) => {
     pixelFormat: 'yuv420p'
   }
   let files = readdirSync(data.inputDir)
-  let images =[]
+  let images = []
   files.map((image) => data.inputDir + '/' + image)
 
-  files.forEach((file) => {if(isImage(file)) images.push(file)} )
-  
+  files.forEach((file) => {
+    if (isImage(file)) images.push(file)
+  })
+
   videoshow(images, videoOptions)
-  .save(data.outputDir + '/' + 'video.mp4')
-  .on('start', function (command) {
-    console.log('ffmpeg process started:', command)
-  })
-  .on('error', function (err, stdout, stderr) {
-    console.error('Error:', err)
-    console.error('ffmpeg stderr:', stderr)
-  })
-  .on('end', function (output) {
-    console.error('Video created in:', output)
-  })
+    .save(data.outputDir + '/' + 'video.mp4')
+    .on('start', function (command) {
+      console.log('ffmpeg process started:', command)
+    })
+    .on('error', function (err, stdout, stderr) {
+      console.error('Error:', err)
+      console.error('ffmpeg stderr:', stderr)
+    })
+    .on('end', function (output) {
+      console.error('Video created in:', output)
+    })
 }
 
 const convert = (data) => {
@@ -167,22 +200,40 @@ const convert = (data) => {
     MODEL,
     INPUT_DIR,
     FROM_TO,
-    OUTPUT_DIR
+    OUTPUT_DIR,
+    METHOD,
+    DETECTOR
   } = data
+  to_convert = 0
+  converted = 0
   let arguments = ['python', dir_to_faceswap, 'convert']
   if (MODEL !== FROM_TO) arguments.push('-s')
   const MODEL_DIR = dir_to_models + MODEL
-  arguments.push('-i', INPUT_DIR, '-o', OUTPUT_DIR, '-m', MODEL_DIR)
+  arguments.push('-o', OUTPUT_DIR, '-m', MODEL_DIR)
 
-  console.log(...arguments)
-  let command = {
-    command: arguments
-  }
+  console.log(INPUT_DIR)
+  let command
+  to_convert = INPUT_DIR.length
+  INPUT_DIR.forEach((dir => {
+    let args = arguments
+    args.push('-i', dir)
+    command = {command:args}
+    win.webContents.send('progress')
+    connect('/run', 'POST', onData = (_data) => {
+      console.log(_data.toString())
+    }, onEnd = () => {}, onError = (err) => {}, onClose = () => {converted++; convertCheck() ;console.log('converted') }, command)
+    args = []
+    command = {}
+  }))
 
-  connect('/run', 'POST', onData = (_data) => {
-    console.log(_data.toString())
-  }, onEnd = () => {}, onError = (err) => {}, onClose = () => {}, command)
+  // connect('/run', 'POST', onData = (_data) => {
+  //   console.log(_data.toString())
+  // }, onEnd = () => {}, onError = (err) => {}, onClose = () => {}, command)
 
+}
+
+const convertCheck = () => {
+  if (converted === to_convert) win.webContents.send('success')
 }
 
 const connect = (path, method = 'GET', onData = (_data) => {}, onEnd = () => {
@@ -250,7 +301,7 @@ const train = ({
   const INPUT_A = dir_to_extracted + person_A
 
   const INPUT_B = dir_to_extracted + person_B
-  arguments.push('-A', INPUT_A, '-B', INPUT_B, '-m', MODEL_DIR, '-s', '5')
+  arguments.push('-A', INPUT_A, '-B', INPUT_B, '-m', MODEL_DIR, '-s', '10')
   // console.log('python faceswap.py train', ...arguments)
 
   let command = {
@@ -260,8 +311,10 @@ const train = ({
 
   connect('/run', method = 'POST', onData = (_data) => {
       console.log(_data.toString())
+      win.webContents.send('progress', _data)
     },
     onEnd = () => {
+      win.webContents.send('succes')
       console.log('end')
     },
     onError = (err) => {},
@@ -291,7 +344,7 @@ const loadDirectoriesNames = dir => {
 const extract = async (data) => {
   const {
     name,
-    pathToFace,
+    photo_path,
     detector
   } = data
   let files = []
@@ -303,27 +356,30 @@ const extract = async (data) => {
   //   if(isImage(file)) images.push(file)
   // })
 
+  let arguments = ['v1/faceswap.py', 'extract']
 
   if (detector === 'hog' || detector === 'cnn') arguments.push('-D', detector)
   // if(images.length>10) images = images.slice(0, 9)
   // if(images.length > 0 ) images.forEach((image, index) => images[index] = pathToFaces + '/' + image)
 
-  let arguments = ['v1/faceswap.py', 'extract']
+
 
   arguments.push('-i', dir_to_raw_photos + name, '-o', dir_to_extracted + name)
 
-  if (pathToFace) arguments.push('-f', pathToFace)
+  if (photo_path) arguments.push('-f', photo_path)
 
   const pyProg = spawn('python', arguments)
 
 
   pyProg.stdout.on('data', data => {
       console.log(`///${data.toString()}`)
+      win.webContents.send('progress', data)
     })
     .on('end', () => {
       console.log('complete')
-      win.webContents.send('on-complete')
+      win.webContents.send('success')
     })
+    .on('close', () => console.log(close))
 }
 
 
@@ -347,33 +403,54 @@ const isVideo = file => {
 }
 
 const loadRawData = async data => {
-  let {
-    paths,
-    name
-  } = data
-  let objDir = {
-    paths: []
+  try {
+    videos_toconvert = 0
+  images_converted = 0
+  videos_converted =0 
+  images_toconvert= 0
+    let {
+      _paths,
+      name
+    } = data
+    let objDir = {
+      paths: []
+    }
+    _paths.forEach((path) => {
+      if (fs.lstatSync(path).isDirectory()) {
+        readDirRecursivly(path, objDir)
+      }
+      if (fs.lstatSync(path).isFile()) {
+        objDir.paths.push(path);
+        console.log(path)
+      }
+    })
+    _paths = [...new Set(objDir.paths)]
+    let videos = []
+    let images = []
+    // folders.forEach((path) => {
+    //   let _files = fs.readdirSync(path)
+    //   _files = _files.filter((file) => file !== '.DS_Store')
+    //   _files.forEach(_file => files.push(path + '/' +  _file))
+    // })
+    _paths.forEach((file) => {
+      if (isImage(file)) images.push(file)
+      if (isVideo(file)) videos.push(file)
+    })
+    videos_toconvert = videos.length
+    images_toconvert = images.length
+    if (images.length !== 0) {
+      win.webContents.send('progress', 'sorting images...');
+      copyAll(images, dir_to_raw_photos + name)
+    }
+    if (videos.length !== 0) {
+      videos.forEach((video) => {
+        win.webContents.send('progress', 'sorting videos...');
+        convertVideoToImages(video, dir_to_raw_photos + name)
+      })
+    }
+  } catch (e) {
+    win.webContents.send('error')
   }
-  console.log(data)
-  paths.forEach((path) => {
-    if (fs.lstatSync(path).isDirectory()){ readDirRecursivly(path, objDir)}
-    if (fs.lstatSync(path).isFile()) objDir.paths.push(path)
-  })
-  paths = [...new Set(objDir.paths)]
-  let videos = []
-  let images = []
-  // folders.forEach((path) => {
-  //   let _files = fs.readdirSync(path)
-  //   _files = _files.filter((file) => file !== '.DS_Store')
-  //   _files.forEach(_file => files.push(path + '/' +  _file))
-  // })
-  paths.forEach((file) => {
-    if (isImage(file)) images.push(file)
-    if (isVideo(file)) videos.push(file)
-  })
-  console.log(paths)
-  // if (images.length !== 0) copyAll(images, path, dir_to_raw_photos + name)
-  // if (videos.length !== 0) videos.forEach((video) => convertVideoToImages(path + '/' + video, dir_to_raw_photos + name))
 }
 
 const addZeroesToMilliseconds = (ms) => {
@@ -430,7 +507,7 @@ const convertVideoFragmentToImages = (video, timeStamps, dstDir, calls_counter) 
 const readDirRecursivly = (dir, dirObj) => {
   let dirs = fs.readdirSync(dir)
   dirs.forEach((path) => {
-    if(path === '.DS_Store') return
+    if (path === '.DS_Store') return
     _path = dir + '/' + path
     if (fs.lstatSync(_path).isDirectory()) readDirRecursivly(_path, dirObj)
     if (fs.lstatSync(_path).isFile()) dirObj.paths.push(_path)
@@ -451,6 +528,9 @@ const convertVideoToImages = async (video, dstDir) => {
     array.push(_value)
     time_offset += Math.ceil(BATCH_SIZE / FPS)
   }
+  videos_converted++
+  succesLoadRawData()
+
 }
 
 const convertVideoToImages_old = async (video, dstDir) => {
@@ -495,21 +575,22 @@ const readdirAsync = (path) => {
 
 const copyFile = (srcDir, destDir) => {
   let readStream = fs.createReadStream(srcDir);
-  console.log('copying...' + srcDir + ' to ' + destDir)
-
   readStream.once('error', (err) => {
     throw err
   })
   // readStream.once('end', () => {
   //   console.log('done copying');
   // })
+  console.log('copying...' + srcDir + ' to ' + destDir)
+  images_converted++
+  succesLoadRawData()
   readStream.pipe(fs.createWriteStream(destDir));
 }
 
-const copyAll = (files, srcDir, destDir) =>
+const copyAll = (files, destDir) =>
   fs.access(destDir, err => {
     if (err) fs.mkdirSync(destDir);
-    files.forEach((file) =>
-      copyFile(path.join(srcDir, file), path.join(destDir, file))
-    )
+    files.forEach((file, index) => {
+      copyFile(file, path.join(destDir, (index + '.png')))
+    })
   })

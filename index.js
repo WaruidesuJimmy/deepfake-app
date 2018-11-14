@@ -8,6 +8,7 @@ let photo_path = ''
 let photo_path_convert = ''
 let paths_convert = new Set()
 let photo_to_video = ''
+let video_path = ''
 //const log_div = document.getElementById('console-output').getElementsByTagName('p')[0]
 
 ipcRenderer.on('log', (e, data) => {
@@ -49,7 +50,9 @@ function hideAll() {
    $('#convert').hide()
    $('#photo-video').hide()
    $('#tutorial').hide()
+   $('#video-photo-v2').hide()
    $('#display-tutorial').removeClass('active')
+   $('#display-video-photo-v2').removeClass('active')
    $('#display-video-photo').removeClass('active')
    $('#display-extract').removeClass('active')
    $('#display-train').removeClass('active')
@@ -83,9 +86,10 @@ $('#send-button-video-photo').on('click', () => {
          display: 'block'
       })
    }
-   console.log({paths, name});
+   let PATHS =  new Array(...paths)
+   console.log({PATHS, name});
    $('#video-photo-loading').show();
-   ipcRenderer.send('load-raw-data', {paths: paths, name})
+   ipcRenderer.send('load-raw-data', {_paths: PATHS, name})
 })
 
 $('#video-photo-loading').hide()
@@ -196,6 +200,7 @@ ipcRenderer.on('convert-load', (e, data) => {
    $('#video-photo-loading').hide()
    let models = document.getElementById('models')
    models.innerHTML = ''
+   let fromto = document.getElementById('FROMTO').innerHTML = ''
 
    for (let text of data) {
       let A = text.substring(0, text.indexOf('-'))
@@ -236,6 +241,11 @@ ipcRenderer.on('convert-load', (e, data) => {
 
 })
 
+$('#display-video-photo-v2').on('click', () => {
+   hideAll()
+   $('#display-video-photo-v2').addClass('active')
+   $('#video-photo-v2').show()
+})
 
 
 $('#display-tutorial').on('click', () => {
@@ -271,8 +281,28 @@ $('#extract-send').on('click', () => {
    //       check = elem.id
     let name= $('#extract-names').val()
     let detector = $('#extract-methods').val()
+    console.log(photo_path)
+   //  let photo_path = photo_path
 
    ipcRenderer.send('extract', {name, photo_path, detector})
+
+
+})
+
+$('#send-button-video-photo-v2').on('click', () => {
+   $('#video-photo-loading').show()
+   // let extract = document.getElementById('extract-content')
+   // let elems = extract.getElementsByTagName('input')
+   // let check = '';
+
+   // for (let elem of elems)
+   //    if (elem.checked)
+   //       check = elem.id
+    
+   let VIDEO = video_path
+   let OUTPUT_DIR = $('#dir-video-photo').val()
+
+   ipcRenderer.send('video-photo', {VIDEO, OUTPUT_DIR})
 
 
 })
@@ -289,29 +319,32 @@ $('#display-train').on('click', () => {
 $('#train-send').on('click', () => {
 
    $('#video-photo-loading').show()
-   let train0 = document.getElementById('train-content0'),
-      train1 = document.getElementById('train-content1')
+   // let train0 = document.getElementById('train-content0'),
+   //    train1 = document.getElementById('train-content1')
 
-   let elems0 = train0.getElementsByTagName('input'),
-      elems1 = train1.getElementsByTagName('input')
-   let check0 = '',
-      check1 = ''
+   // let elems0 = train0.getElementsByTagName('input'),
+   //    elems1 = train1.getElementsByTagName('input')
+   // let check0 = '',
+   //    check1 = ''
 
-   for (let elem of elems0)
-      if (elem.checked)
-         check0 = elem.id
+   // for (let elem of elems0)
+   //    if (elem.checked)
+   //       check0 = elem.id
 
-   for (let elem of elems1)
-      if (elem.checked)
-         check1 = elem.id
+   // for (let elem of elems1)
+   //    if (elem.checked)
+   //       check1 = elem.id
 
-   let answ = {
-      check0,
-      check1
-   }
+   // let answ = {
+   //    check0,
+   //    check1
+   // }
 
-
-   ipcRenderer.send('train', answ)
+   let person_A = $('#personA').val()
+   let person_B = $('#personB').val()
+   let trainer = $('#train-methods').val()
+   let BATCH_SIZE = $('#bs').val()
+   ipcRenderer.send('train', {person_A, person_B, trainer, BATCH_SIZE})
 
 })
 
@@ -333,15 +366,21 @@ $('#display-convert').on('click', () => {
 
 $('#convert-send').on('click', () => {
    $('#video-photo-loading').show()
-   let convert = document.getElementById('convert-content')
-   let elems = convert.getElementsByTagName('input')
-   let check = '';
+   // let convert = document.getElementById('convert-content')
+   // let elems = convert.getElementsByTagName('input')
+   // let check = '';
 
-   for (let elem of elems)
-      if (elem.checked)
-         check = elem.id
-
-   ipcRenderer.send('convert', check)
+   // for (let elem of elems)
+   //    if (elem.checked)
+   //       check = elem.id
+   let METHOD = $('#convert-methods').val()
+   let MODEL = $('#models').val()
+   let FROM_TO = $('#FROMTO').val()
+   let INPUT_DIR = new Array(...paths_convert)
+   let OUTPUT_DIR = $('#convert-output-directory').val()
+   let DETECTOR = $('#convert-detector').val()
+   let PHOTO = photo_path_convert
+   ipcRenderer.send('convert', {METHOD, MODEL, FROM_TO, INPUT_DIR, OUTPUT_DIR, DETECTOR, PHOTO})
 
 
 })
@@ -510,10 +549,42 @@ drop_photo_convert.ondrop = (e) => {
          <img src= ${f.path}>
          `
       )
-      photo_path = f.path
+      photo_path_convert = f.path
 
    }
 
 
    return false;
+}
+
+
+
+let darg_video = document.getElementById('drag-video');
+
+darg_video.ondragover = () => {
+   return false;
+};
+
+darg_video.ondragleave = () => {
+   return false;
+};
+
+darg_video.ondragend = () => {
+   return false;
+};
+darg_video.ondrop = (e) => {
+   e.preventDefault();
+   for (let f of e.dataTransfer.files) {
+      console.log(f.path)
+      video_path = f.path
+      $('#dirs-video-photo').html(`<a class="ui label">${f.path}<i class="delete icon" onclick="delete_video(this)"><div vlaue = '!${f.path}!'></div></i></a>`)
+
+   }
+
+   return false;
+}
+
+function delete_video(elm) {
+   video_path = ''
+   $(elm).parent().remove()
 }

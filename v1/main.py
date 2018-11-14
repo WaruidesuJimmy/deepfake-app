@@ -50,7 +50,7 @@ def run():
 def convert():
     return convert
 
-@app.route('/stop')
+@app.route('/kill')
 def kill():
     os.popen('pkill -f faceswap.py')
     return 'Process has been killed'

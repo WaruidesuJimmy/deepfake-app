@@ -50,6 +50,9 @@
           <a class="item" value="convert" id="display-convert">
             Convert
           </a>
+          <a class="item" value="video-photo-v2" id="display-video-photo-v2">
+              Convert video to images
+            </a>
           <a class="item" value="photo-video" id="display-photo-video">
             Convert images to video
           </a>
@@ -96,45 +99,45 @@
         <div id='dirs'>
         </div>
       </div> -->
-    </div>
+  </div>
 
-    <div id='video-photo' class="element">
-      <div class="ui placeholder segment">
-        <div class="ui two column very relaxed stackable grid">
-          <div class="column">
-            <div class="ui form">
-              <div class="field">
-                <label>Name of person (required) </label>
-                <div class="ui left icon input">
-                  <input type="text" placeholder="Name" id="name-video-photo">
-                  <i class="user icon"></i>
-                </div>
-                <div class="ui below pointing red basic label">
-                  Name is required!
-                </div>
+  <div id='video-photo' class="element">
+    <div class="ui placeholder segment">
+      <div class="ui two column very relaxed stackable grid">
+        <div class="column">
+          <div class="ui form">
+            <div class="field">
+              <label>Name of person (required) </label>
+              <div class="ui left icon input">
+                <input type="text" placeholder="Name" id="name-video-photo">
+                <i class="user icon"></i>
               </div>
-              <div class="ui blue submit button" value="send" id="send-button-video-photo">Sort person's files</div>
+              <div class="ui below pointing red basic label">
+                Name is required!
+              </div>
             </div>
-          </div>
-          <div class="column" id='drag'>
-            <h2 class="ui icon header">
-              <i class="copy outline icon"></i>
-              <div class="content">
-                Drop files here
-                <div class="sub header"> Drag and drop files which contains videos and images with person .</div>
-              </div>
-            </h2>
-
+            <div class="ui blue submit button" value="send" id="send-button-video-photo">Sort person's files</div>
           </div>
         </div>
+        <div class="column" id='drag'>
+          <h2 class="ui icon header">
+            <i class="copy outline icon"></i>
+            <div class="content">
+              Drop files here
+              <div class="sub header"> Drag and drop files which contains videos and images with person .</div>
+            </div>
+          </h2>
 
-        <div class="ui vertical divider">
-          Or
         </div>
       </div>
-      <div id='dirs'>
+
+      <div class="ui vertical divider">
+        Or
       </div>
     </div>
+    <div id='dirs'>
+    </div>
+  </div>
   </div>
 
   <div class="ui icon message" id="video-photo-loading">
@@ -364,8 +367,8 @@
             <div class="field">
               <label>Output directory </label>
               <div class="ui left icon input">
-                <input type="text" placeholder="directory" id="directory-photo-video">
-                <i class="user icon"></i>
+                <input type="text" placeholder="Folder" id="directory-photo-video">
+                <i class="folder outline icon"></i>
               </div>
               <div class="ui below pointing red basic label">
                 Directory is required!
@@ -392,6 +395,44 @@
     </div>
     <div id='dirs-photo-video'>
     </div>
+  </div>
+  <div id='video-photo-v2' class="element">
+    <div class="ui placeholder segment">
+      <div class="ui two column very relaxed stackable grid">
+        <div class="column">
+          <div class="ui form">
+            <div class="field">
+              <label>Output directory (required) </label>
+              <div class="ui left icon input">
+                <input type="text" placeholder="Folder" id="dir-video-photo">
+                <i class="folder outline icon"></i>
+              </div>
+              <div class="ui below pointing red basic label">
+                Directory is required!
+              </div>
+            </div>
+            <div class="ui blue submit button" value="send" id="send-button-video-photo-v2">Convert video to photo</div>
+          </div>
+        </div>
+        <div class="column" id='drag-video'>
+          <h2 class="ui icon header">
+            <i class="copy outline icon"></i>
+            <div class="content">
+              Drop files here
+              <div class="sub header"> Drag and drop files which contains videos and images with person .</div>
+            </div>
+          </h2>
+
+        </div>
+      </div>
+
+      <div class="ui vertical divider">
+        Or
+      </div>
+    </div>
+    <div id='dirs-video-photo'>
+    </div>
+  </div>
   </div>
 
   <div class="ui negative message" id="err">
